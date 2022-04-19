@@ -27,13 +27,6 @@ function hash_directory (value: directory): number {
     h = 31 * h + parseInt(value.name.charAt(i))
   }
 
-  for (let i = 0; i < value.name.length; i++) {
-    h = 31 * h + parseInt(value.name.charAt(i))
-  }
-
-  for (let i = 0; i < value.messages.length; i++) {
-    h += hash_message(value.messages[i])
-  }
   if (value.subdirectory != null) {
     h += hash_directory(value.subdirectory)
   }
