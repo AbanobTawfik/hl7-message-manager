@@ -11,6 +11,10 @@ function hash_message (value: message): number {
     h = 31 * h + parseInt(value.comserver.charAt(i))
   }
 
+  for (let i = 0; i < value.description.length; i++) {
+    h = 31 * h + parseInt(value.description.charAt(i))
+  }
+
   for (let i = 0; i < value.scripts.length; i++) {
     for (let j = 0; i < value.scripts[i].length; j++) {
       h = 31 * h + parseInt(value.scripts[i].charAt(j))

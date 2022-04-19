@@ -42,6 +42,7 @@ export function add_message (
   directory: directory,
   comserver: string = null,
   scripts: string[] = null,
+  description: string = null,
   raw_message: string
 ): return_status {
   // check if directory exists
@@ -55,6 +56,7 @@ export function add_message (
   let message_to_add: message = {
     raw_message: raw_message,
     comserver: comserver,
+    description: description,
     scripts: scripts
   }
   // check if this message exists in this instance of the map
@@ -131,7 +133,8 @@ export function modify_message (
   message: message,
   raw_message: string = null,
   comserver: string = null,
-  scripts: string[] = null
+  scripts: string[] = null,
+  description: string = null
 ): return_status {
   let hash_value_directory = hasher.hash(directory)
   if (!translation.has(hash_value_directory)) {
@@ -152,8 +155,9 @@ export function modify_message (
   old_message.comserver = comserver == null ? old_message.comserver : comserver
   old_message.raw_message =
     raw_message == null ? old_message.raw_message : raw_message
-  old_message.scripts =
-    old_message.scripts == null ? old_message.scripts : scripts
+  old_message.scripts = scripts == null ? old_message.scripts : scripts
+  old_message.description =
+    description == null ? old_message.description : description
   // rehash to insert modifications
   hash_value_message = hasher.hash(old_message)
   message_map.set(hash_value_message, old_message)
