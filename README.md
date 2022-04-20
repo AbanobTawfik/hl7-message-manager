@@ -2,13 +2,16 @@
 
 Table of contents
 
-1. [Current Issues](#current-issues)
-2. [What I Will Do](#what-i-will-do)
-3. [Search Modes](#search-modes)
-4. [File Structures](#file-structures)
-5. [Models](#models)
-   1. [Directory](#directory)
-   2. [Messages](#messages)
+- [The HL7 Message Manager](#the-hl7-message-manager)
+  - [Current Issues](#current-issues)
+  - [What I Will Do](#what-i-will-do)
+  - [Search Modes](#search-modes)
+  - [File Structures](#file-structures)
+  - [Models](#models)
+    - [Directory](#directory)
+    - [Messages](#messages)
+- [Search use cases](#search-use-cases)
+  - [search with 0 filters](#search-with-0-filters)
 
 This application is designed to create a simple and organised way to keep track of your hl7 messages.
 
@@ -70,3 +73,23 @@ R = recursive, U = unit
 - script: String
 - comserver: String
 - raw_message: String
+
+
+---
+
+# Search use cases
+All searches will return a list of messages that contain the following information in almost inforgaphic sense
+  1. description at top
+  2. comserver + scripts this message was used for
+  3. Raw message to the left
+  4. and the directory path from root where this message is stored
+  5. copy button which will copy the message straight to your clipboard
+  6. diff button which will open a diff tool to allow you to differentiate with another message
+
+---
+## search with 0 filters
+This is considered a global search. any terms entered into the search bar will be used to match on ALL messages accross all directories. This is the broadest search and will be the slowest search too.
+To perform this search simply try to put keywords, and through the use of flexsearch library, all features will be searched to do this.
+
+## filter search (inside a directory)
+using a similair stratergy to the above 
