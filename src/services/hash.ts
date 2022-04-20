@@ -1,50 +1,17 @@
-import directory from '../types/directory'
+import directory, { get_path_from_root } from '../types/directory'
 import message from '../types/message'
 
-function hash_message (value: message): number {
+
+
+function hash(value: directory): number {
   let h: number = 0
-  for (let i = 0; i < value.raw_message.length; i++) {
-    h = 31 * h + parseInt(value.raw_message.charAt(i))
-  }
+  let path: string = get_path_from_root(value)
 
-  for (let i = 0; i < value.comserver.length; i++) {
-    h = 31 * h + parseInt(value.comserver.charAt(i))
-  }
-
-  for (let i = 0; i < value.description.length; i++) {
-    h = 31 * h + parseInt(value.description.charAt(i))
-  }
-
-  for (let i = 0; i < value.scripts.length; i++) {
-    for (let j = 0; i < value.scripts[i].length; j++) {
-      h = 31 * h + parseInt(value.scripts[i].charAt(j))
-    }
-  }
-
-  return h
-}
-
-function hash_directory (value: directory): number {
-  let h: number = 0
-
-  for (let i = 0; i < value.name.length; i++) {
+  for (let i = 0; i < path.length; i++) {
     h = 31 * h + parseInt(value.name.charAt(i))
   }
 
-  if (value.subdirectory != null) {
-    h += hash_directory(value.subdirectory)
-  }
   return h
-}
-
-function hash (value: any): number {
-  if (value as message) {
-    return hash_message(value)
-  }
-  if (value as directory) {
-    return hash_directory(value)
-  }
-  return -1
 }
 
 const hasher = {
