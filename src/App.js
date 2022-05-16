@@ -1,6 +1,7 @@
 import logo from './logo.svg'
 import './App.css'
 import React, { Component } from 'react'
+import Document from 'flexsearch'
 function App () {
   return (
     <div className='App'>
