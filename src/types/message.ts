@@ -1,4 +1,5 @@
 type message = {
+  directory_path: string
   comserver: string
   scripts: string[]
   description: string

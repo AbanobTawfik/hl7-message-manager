@@ -1,7 +1,7 @@
-import directory from '../types/directory'
-import message from '../types/message'
-import return_status from '../types/return_status'
-import hasher from './hash'
+import directory, { get_directory_name, get_path_from_root } from '../types/directory.ts'
+import message from '../types/message.ts'
+import return_status from '../types/return_status.ts'
+import hasher from './hash.ts'
 
 let dictionary: Map<number, directory> = new Map<number, directory>()
 
@@ -46,11 +46,13 @@ export function add_message(
             message: 'attempting to add into an invalid directory!'
         }
     }
+    let path: string = get_path_from_root(directory)
     let message_to_add: message = {
         raw_message: raw_message,
         comserver: comserver,
         description: description,
-        scripts: scripts
+        scripts: scripts,
+        directory_path: path
     }
     // check if this message exists in this instance of the map
     if (directory.messages.filter(m => m.raw_message == message_to_add.raw_message).length > 0) {
