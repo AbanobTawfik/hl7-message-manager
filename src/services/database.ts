@@ -1,24 +1,22 @@
-import fs from 'fs'
-import global_variables from '../globals/global_variables'
+import global_variables from '../globals/global_variables.ts'
 import directory from '../types/directory'
-import message from '../types/message'
+import {stringify, parse} from 'circular-json'
 
-let database: string
 let database_object:  Map<number, directory>
 
 // only used on start up
 export function read_file(): Map<number, directory> {
   // if file doesnt exist we will create it
-  if (!fs.existsSync(global_variables.database_path)) {
-    let dictionary_name = global_variables.dictionary_name
+  let data: string = window.localStorage.getItem(global_variables.dictionary_name)
+  if (data == null) {
     let write_object: any = new Map<number, directory>()
     
-
-    fs.writeFileSync(global_variables.database_path, JSON.parse(write_object))
+    window.localStorage.setItem(global_variables.dictionary_name, stringify(Array.from(write_object)))
     return write_object
   }
-  let data: string = fs.readFileSync(global_variables.database_path, 'utf-8')
-  database_object = JSON.parse(data)
+  
+  database_object = new Map(parse(data))
+  // console.log(database_object)
 
   return database_object
 }
@@ -35,22 +33,11 @@ export function read_file(): Map<number, directory> {
 export function write_file(
   dictionary: Map<number, directory>
 ): boolean {
-
-  let write_output = JSON.stringify(dictionary)
-  // write to a temp file first
-  try {
-    fs.writeFileSync(global_variables.tmp_database_path, write_output)
-    // delete old file
-    fs.unlinkSync(global_variables.database_path)
-    // rename to new file
-    fs.renameSync(
-      global_variables.tmp_database_path,
-      global_variables.database_path
-    )
-  } catch (err) {
-    console.error(err)
-  }
-
+  let object:any = {}
+  object[global_variables.dictionary_name] = dictionary
+  let write_output = stringify(Array.from(dictionary.entries()))
+  console.log(dictionary)
+  window.localStorage.setItem(global_variables.dictionary_name, write_output)
   return true
 }
 
