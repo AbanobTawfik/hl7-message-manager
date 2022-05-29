@@ -4,6 +4,7 @@ type message = {
   scripts: string[]
   description: string
   raw_message: string
+  type: string
 }
 
 export default message

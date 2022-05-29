@@ -5,15 +5,17 @@ type directory = {
   parent_directory: directory
   sub_directories: directory[]
   messages: message[]
+  type: string
 }
 
 export default directory
 
 export function get_path_from_root(directory: directory): string {
-  if (directory.parent_directory.name !== "root") {
+  if (directory.name === "root") {
     return directory.name
   }
-  return "/" + get_path_from_root(directory)
+  // return get_path_from_root(directory.parent_directory, directory.name + "/" + current_path)
+  return  get_path_from_root(directory.parent_directory) + "/" + directory.name;
 }
 
 
