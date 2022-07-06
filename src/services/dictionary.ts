@@ -2,7 +2,7 @@ import directory, { get_directory_name, get_path_from_root } from '../types/dire
 import message from '../types/message.ts'
 import return_status from '../types/return_status.ts'
 import hasher from './hash.ts'
-import {write_file} from "../services/database.ts"
+import { write_file } from "../services/database.ts"
 
 
 let dictionary: Map<number, directory> = new Map<number, directory>()
@@ -10,7 +10,7 @@ let dictionary: Map<number, directory> = new Map<number, directory>()
 
 // export default dictionary
 
-export function get_dictionary(): Map<number, directory>{
+export function get_dictionary(): Map<number, directory> {
     return dictionary
 }
 
@@ -18,20 +18,20 @@ export function load_dictionary_from_storage(storage_object: Map<number, directo
     dictionary = storage_object
 }
 
-export function get_directory_by_name(path: string) : directory{
+export function get_directory_by_name(path: string): directory {
     let h: number = hasher.hash(path)
     return dictionary.get(h)
 }
 
 export function get_all_directory_names(): string[] {
     let directory_names: string[] = []
-    for(let [key, value] of dictionary.entries()){
+    for (let [key, value] of dictionary.entries()) {
         directory_names.push(get_path_from_root(value))
     }
     return directory_names;
 }
 
-export function create_root() : return_status{
+export function create_root(): return_status {
     let root: directory = {
         parent_directory: null,
         sub_directories: [],
@@ -40,12 +40,12 @@ export function create_root() : return_status{
         type: 'directory'
     }
     let hash_value: number = hasher.hash(root)
-    if(dictionary.has(hash_value)){
-        return {status: false, message: 'Root already exists'}
+    if (dictionary.has(hash_value)) {
+        return { status: false, message: 'Root already exists' }
     }
     dictionary.set(hash_value, root)
     write_file(dictionary)
-    return {status: true, message: 'Root created'}
+    return { status: true, message: 'Root created' }
 }
 
 export function add_directory(
@@ -74,9 +74,9 @@ export function add_directory(
 
 export function add_message(
     directory: directory,
-    comserver: string = null,
-    scripts: string[] = null,
-    description: string = null,
+    comserver: string = "",
+    scripts: string[] = [],
+    description: string = "",
     raw_message: string
 ): return_status {
     // check if directory exists
@@ -176,10 +176,10 @@ export function modify_directory(
 export function modify_message(
     directory: directory,
     message: message,
-    raw_message: string = null,
-    comserver: string = null,
-    scripts: string[] = null,
-    description: string = null
+    raw_message: string = "",
+    comserver: string = "",
+    scripts: string[] = [],
+    description: string = ""
 ): return_status {
     let hash_value_directory: number = hasher.hash(directory)
     if (!dictionary.has(hash_value_directory)) {
@@ -196,7 +196,7 @@ export function modify_message(
     }
     // remove old unmodified message
     directory.messages.splice(message_index, 1)
-    
+
     message.comserver = comserver == null ? message.comserver : comserver
     message.raw_message =
         raw_message == null ? message.raw_message : raw_message
@@ -209,3 +209,12 @@ export function modify_message(
 
     return { status: true, message: 'message has been modified!' }
 }
+
+export function get_all_messages(directory: directory): message[] {
+    let hash_value_directory: number = hasher.hash(directory)
+    if (!dictionary.has(hash_value_directory)) {
+        return []
+    }
+    return directory.messages
+}
+
