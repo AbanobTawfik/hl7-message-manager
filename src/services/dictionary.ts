@@ -218,3 +218,10 @@ export function get_all_messages(directory: directory): message[] {
     return directory.messages
 }
 
+export function get_all_directories_from_current(name: string): directory[]{
+    let hash_value_directory: number = hasher.hash(name)
+    if (!dictionary.has(hash_value_directory)) {
+        return [];
+    }
+    return dictionary.get(hash_value_directory).sub_directories;
+}
