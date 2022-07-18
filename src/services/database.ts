@@ -1,8 +1,8 @@
 import global_variables from '../globals/global_variables.ts'
 import directory from '../types/directory'
-import {stringify, parse} from 'circular-json'
+import { stringify, parse } from 'circular-json'
 
-let database_object:  Map<number, directory>
+let database_object: Map<number, directory>
 
 // only used on start up
 export function read_file(): Map<number, directory> {
@@ -10,11 +10,11 @@ export function read_file(): Map<number, directory> {
   let data: string = window.localStorage.getItem(global_variables.dictionary_name)
   if (data == null) {
     let write_object: any = new Map<number, directory>()
-    
+
     window.localStorage.setItem(global_variables.dictionary_name, stringify(Array.from(write_object)))
     return write_object
   }
-  
+
   database_object = new Map(parse(data))
   // console.log(database_object)
 
@@ -33,12 +33,23 @@ export function read_file(): Map<number, directory> {
 export function write_file(
   dictionary: Map<number, directory>
 ): boolean {
-  let object:any = {}
+  let object: any = {}
   object[global_variables.dictionary_name] = dictionary
   let write_output = stringify(Array.from(dictionary.entries()))
   console.log(dictionary)
   window.localStorage.setItem(global_variables.dictionary_name, write_output)
   return true
+}
+
+export function write_current_directory(directory: string) {
+  window.localStorage.setItem(global_variables.current_directory, directory)
+}
+
+export function read_current_directory() {
+  if (window.localStorage.getItem(global_variables.current_directory) == "" || window.localStorage.getItem(global_variables.current_directory) == null) {
+    window.localStorage.setItem(global_variables.current_directory, "root")
+  }
+  return window.localStorage.getItem(global_variables.current_directory)
 }
 
 export default database_object
