@@ -23,6 +23,10 @@ export function get_directory_by_name(path: string): directory {
     return dictionary.get(h)
 }
 
+export function get_directory_path(directory: directory): string{
+    return get_path_from_root(directory);
+}
+
 export function get_all_directory_names(): string[] {
     let directory_names: string[] = []
     for (let [key, value] of dictionary.entries()) {
