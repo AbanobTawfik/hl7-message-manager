@@ -1,12 +1,15 @@
 import React, { FC } from 'react';
 import styles from './Add.module.scss';
+import './Add.module.scss'
+import add_icon from '../../resources/Icons/add.png'
 
 interface AddProps {}
 
 const Add: FC<AddProps> = () => (
   <div className={styles.Add} data-testid="Add">
-    Add Component
-  </div>
+    <img className="img-fluid .resize" src={add_icon} />
+    Add
+  </div>    
 );
 
 export default Add;
