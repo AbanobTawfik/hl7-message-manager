@@ -8,30 +8,22 @@ import return_status from '../types/return_status.ts'
 import hasher from './hash.ts'
 // @ts-ignore
 import { write_file } from "../services/database.ts"
+import { stringify, parse } from 'circular-json'
 
-let dictionary: Map<number, directory> = new Map<number, directory>()
-
-
-// export default dictionary
-
-export function get_dictionary(): Map<number, directory> {
-    return dictionary
-}
-
-export function load_dictionary_from_storage(storage_object: Map<number, directory>) {
-    dictionary = storage_object
-}
-
-export function get_directory_by_name(path: string): directory {
+// passive
+export function get_directory_by_name(dictionary: Map<number, directory>, path: string): directory {
+    // console.log("DICTDICTDICT", dictionary, "\n\n\n")
     let h: number = hasher.hash(path)
     return dictionary.get(h)
 }
 
+// passive
 export function get_directory_path(directory: directory): string {
     return get_path_from_root(directory);
 }
 
-export function get_all_directory_names(): string[] {
+// passive
+export function get_all_directory_names(dictionary: Map<number, directory>): string[] {
     let directory_names: string[] = []
     for (let [key, value] of dictionary.entries()) {
         directory_names.push(get_path_from_root(value))
@@ -39,7 +31,8 @@ export function get_all_directory_names(): string[] {
     return directory_names;
 }
 
-export function create_root(): return_status {
+// modifiying
+export function create_root(dictionary: Map<number, directory>): return_status {
     let root: directory = {
         parent_directory: null,
         sub_directories: [],
@@ -49,19 +42,23 @@ export function create_root(): return_status {
     }
     let hash_value: number = hasher.hash(root)
     if (dictionary.has(hash_value)) {
-        return { status: false, message: 'Root already exists' }
+        return { map: dictionary, status: false, message: 'Root already exists' }
     }
-    dictionary.set(hash_value, root)
-    write_file(dictionary)
-    return { status: true, message: 'Root created' }
+    let map_copy = new Map<number, directory>(dictionary)
+    map_copy.set(hash_value, root)
+    write_file(map_copy)
+    return { map: map_copy, status: true, message: 'Root created' }
 }
 
+// modifying
 export function add_directory(
+    dictionary: Map<number, directory>,
     parent_directory: directory,
     name: string
 ): return_status {
+    let parent_directory_copy = parse(stringify(parent_directory))
     let add: directory = {
-        parent_directory: parent_directory,
+        parent_directory: parent_directory_copy,
         sub_directories: [],
         name: name,
         messages: [],
@@ -70,17 +67,20 @@ export function add_directory(
 
     let hash_value: number = hasher.hash(add)
     if (dictionary.has(hash_value)) {
-        return { status: false, message: 'Directory path already exists' }
+        return { map: dictionary, status: false, message: 'Directory path already exists' }
     }
+    let map_copy = new Map<number, directory>(dictionary)
     // set the subdirectory of the parent to the new directory
-    parent_directory.sub_directories.push(add)
+    parent_directory_copy.sub_directories.push(add)
 
-    dictionary = dictionary.set(hash_value, add)
-    write_file(dictionary)
-    return { status: true, message: 'Success' }
+    map_copy = map_copy.set(hash_value, add)
+    write_file(map_copy)
+    return { map: map_copy, status: true, message: 'Success' }
 }
 
+// modifying
 export function add_message(
+    dictionary: Map<number, directory>,
     directory: directory,
     comserver: string = "",
     scripts: string[] = [],
@@ -89,13 +89,17 @@ export function add_message(
 ): return_status {
     // check if directory exists
     let hash_value_directory: number = hasher.hash(directory)
+
     if (!dictionary.has(hash_value_directory)) {
         return {
+            map: dictionary,
             status: false,
             message: 'attempting to add into an invalid directory!'
         }
     }
-    let path: string = get_path_from_root(directory)
+    let directory_copy = parse(stringify(directory))
+
+    let path: string = get_path_from_root(directory_copy)
     let message_to_add: message = {
         raw_message: raw_message,
         comserver: comserver,
@@ -105,131 +109,150 @@ export function add_message(
         type: 'message'
     }
     // check if this message exists in this instance of the map
-    if (directory.messages.filter(m => m.raw_message === message_to_add.raw_message).length > 0) {
-        return { status: false, message: 'value already exists in this directory!' }
+    if (directory_copy.messages.filter(m => m.raw_message === message_to_add.raw_message).length > 0) {
+        return { map: dictionary, status: false, message: 'value already exists in this directory!' }
     }
+    let map_copy = new Map<number, directory>(dictionary)
+
     // add the message to the directory
-    dictionary.get(hash_value_directory).messages.push(message_to_add)
-    write_file(dictionary)
-    return { status: true, message: 'value has been added into the directory!' }
+    map_copy.get(hash_value_directory).messages.push(message_to_add)
+    write_file(map_copy)
+    return { map: map_copy, status: true, message: 'value has been added into the directory!' }
 }
 
-export function remove_directory(directory: directory): return_status {
+// modifying
+export function remove_directory(dictionary: Map<number, directory>, directory: directory): return_status {
     let hash_value_directory: number = hasher.hash(directory)
     if (!dictionary.has(hash_value_directory)) {
-        return { status: false, message: "directory doesn't exist!" }
+        return { map: dictionary, status: false, message: "directory doesn't exist!" }
     }
-    let directory_index: number = directory.sub_directories.indexOf(directory)
-    directory.messages = null
+    let directory_copy = parse(stringify(directory))
+    let directory_index: number = directory_copy.sub_directories.indexOf(directory_copy)
+    directory_copy.messages = null
     // remove it from parent directory
-    directory.parent_directory.sub_directories.splice(directory_index, 1)
+    directory_copy.parent_directory.sub_directories.splice(directory_index, 1)
     // remove it from all sub directories as parent
-    directory.sub_directories.forEach(d => d.parent_directory = null)
-    directory.sub_directories = null
-    dictionary.delete(hash_value_directory)
-    write_file(dictionary)
-    return { status: true, message: 'directory has been removed!' }
+    directory_copy.sub_directories.forEach(d => d.parent_directory = null)
+    directory_copy.sub_directories = null
+    let map_copy = new Map<number, directory>(dictionary)
+    map_copy.delete(hash_value_directory)
+    write_file(map_copy)
+    return { map: map_copy, status: true, message: 'directory has been removed!' }
 }
 
+// modifying
 export function remove_message(
+    dictionary: Map<number, directory>,
     directory: directory,
     message: message
 ): return_status {
     let hash_value_directory: number = hasher.hash(directory)
     if (!dictionary.has(hash_value_directory)) {
-        return { status: false, message: "directory doesn't exist!" }
+        return { map: dictionary, status: false, message: "directory doesn't exist!" }
     }
 
     let message_index: number = directory.messages.indexOf(message)
     if (message_index === -1) {
         return {
+            map: dictionary,
             status: false,
             message:
                 "message you are trying to delete doesn't exist in the directory!"
         }
     }
-    directory.messages.splice(message_index, 1)
-    write_file(dictionary)
+    let directory_copy = parse(stringify(directory))
+    let map_copy = new Map<number, directory>(dictionary)
+
+    directory_copy.messages.splice(message_index, 1)
+    map_copy[hash_value_directory] = directory_copy
+    write_file(map_copy)
     return {
+        map: map_copy,
         status: true,
         message: 'message was deleted from the directory!'
     }
 }
 
-// modify the directory name, only allow name change!!!!!
+// modifying
 export function modify_directory(
+    dictionary: Map<number, directory>,
     directory: directory,
     name: string
 ): return_status {
     let hash_value_directory: number = hasher.hash(directory)
     if (!dictionary.has(hash_value_directory)) {
-        return { status: false, message: "directory doesn't exist!" }
+        return { map: dictionary, status: false, message: "directory doesn't exist!" }
     }
-    // just update the name of the directory and update the map to reflect this
+    let directory_copy: directory = parse(stringify(directory))
+    directory_copy.name = name
+    let map_copy = new Map<number, directory>(dictionary)
 
-    // keep track of old map values for this specific hash!
-    let old_directory: directory = dictionary.get(hash_value_directory)
     // delete them since the hash will change!!!
-    dictionary.delete(hash_value_directory)
-    // modify directory
-    old_directory.name = name;
+    map_copy.delete(hash_value_directory)
     // compute new hash
-    hash_value_directory = hasher.hash(old_directory)
-    dictionary.set(hash_value_directory, old_directory)
-    write_file(dictionary)
-    return { status: true, message: 'changed name successfully!' }
+    hash_value_directory = hasher.hash(directory_copy)
+    map_copy.set(hash_value_directory, directory_copy)
+    write_file(map_copy)
+    return { map: map_copy, status: true, message: 'changed name successfully!' }
 }
 
-// modify any aspect of the message you please
+// modifying
 export function modify_message(
+    dictionary: Map<number, directory>,
     message: message,
     raw_message: string = "",
     comserver: string = "",
     scripts: string[] = [],
     description: string = ""
 ): return_status {
-    let directory: directory = get_directory_by_name(message.directory_path)
+    console.log(dictionary)
+    let map_copy = new Map<number, directory>(dictionary)
+    let message_copy: message = parse(stringify(message))
+    let directory: directory = parse(stringify(get_directory_by_name(map_copy, message_copy.directory_path)))
+    console.log(directory)
     let hash_value_directory: number = hasher.hash(directory)
-    if (!dictionary.has(hash_value_directory)) {
-        return { status: false, message: "directory doesn't exist!" }
+    if (!map_copy.has(hash_value_directory)) {
+        return { map: dictionary, status: false, message: "directory doesn't exist!" }
     }
+    let same_message = (message.comserver === comserver) 
     // try retrieve this message
-    let message_index: number = -1;
+    let new_messages = []
+    let found = false;
     for (let i = 0; i < directory.messages.length; i++) {
         if (directory.messages[i].comserver === message.comserver &&
             directory.messages[i].description === message.description &&
             JSON.stringify(directory.messages[i].scripts) === JSON.stringify(message.scripts) &&
             directory.messages[i].raw_message === message.raw_message) {
-            message_index = i;
-            break;
+            found = true
+            continue;
         }
+        // @ts-ignore
+        new_messages.push(directory.messages[i])
     }
-    console.log(message_index)
-    if (message_index === -1) {
+    if (!found) {
         return {
+            map: dictionary,
             status: false,
             message:
                 "message you are trying to delete doesn't exist in the directory!"
         }
     }
     // remove old unmodified message
-    let copy_messages = Array.from(directory.messages)
-    copy_messages.splice(message_index, 1)
-    directory.messages = copy_messages
-    let new_message: message = {}
-    message.comserver = comserver == null ? message.comserver : comserver
-    message.raw_message =
+    directory.messages = [...new_messages]
+    message_copy.comserver = comserver == null ? message.comserver : comserver
+    message_copy.raw_message =
         raw_message == null ? message.raw_message : raw_message
-    message.scripts = scripts == null ? message.scripts : scripts
-    message.description =
+    message_copy.scripts = scripts == null ? message.scripts : scripts
+    message_copy.description =
         description == null ? message.description : description
-    console.log("message val", message)
-    write_file(dictionary)
-
-    return { status: true, message: 'message has been modified!' }
+    directory.messages.push(message_copy)
+    map_copy.set(hash_value_directory, directory) 
+    write_file(map_copy)
+    return { map: map_copy, status: true, message: 'message has been modified!' }
 }
 
-export function get_all_messages(directory: directory): message[] {
+// passive
+export function get_all_messages(dictionary: Map<number, directory>, directory: directory): message[] {
     let hash_value_directory: number = hasher.hash(directory)
     if (!dictionary.has(hash_value_directory)) {
         return []
@@ -237,7 +260,8 @@ export function get_all_messages(directory: directory): message[] {
     return directory.messages
 }
 
-export function get_all_directories_from_current(name: string): directory[] {
+// passive
+export function get_all_directories_from_current(dictionary: Map<number, directory>, name: string): directory[] {
     let hash_value_directory: number = hasher.hash(name)
     if (!dictionary.has(hash_value_directory)) {
         return [];
