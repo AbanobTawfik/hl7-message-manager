@@ -7,7 +7,7 @@ import {bindActionCreators} from 'redux'
 function App() {
   console.log("NOT RERENDERING AGAIN")
   return (
-    <div className='App'>
+    <div className='App' id="APPJS">
       <header className='App-header'>
         {<Dictionary />}
       </header>
