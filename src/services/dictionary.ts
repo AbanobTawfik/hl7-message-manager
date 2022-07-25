@@ -1,7 +1,12 @@
+// @ts-ignore
 import directory, { get_directory_name, get_path_from_root } from '../types/directory.ts'
+// @ts-ignore
 import message from '../types/message.ts'
+// @ts-ignore
 import return_status from '../types/return_status.ts'
+// @ts-ignore
 import hasher from './hash.ts'
+// @ts-ignore
 import { write_file } from "../services/database.ts"
 
 let dictionary: Map<number, directory> = new Map<number, directory>()
