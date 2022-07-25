@@ -11,7 +11,6 @@ export function Window({ current_directory }) {
   all_subs_and_messages.push(...current_directory.sub_directories)
   all_subs_and_messages.push(...current_directory.messages)
   all_subs_and_messages.push("final item")
-  console.log(all_subs_and_messages)
   const rows = [...Array(Math.ceil((all_subs_and_messages.length + 1) / 6))]
   const entryRows = rows.map((row, idx) => all_subs_and_messages.slice(idx * 6, idx * 6 + 6))
 

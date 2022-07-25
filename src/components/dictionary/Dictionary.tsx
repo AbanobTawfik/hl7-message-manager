@@ -16,12 +16,8 @@ export function Dictionary(DictionaryProps) {
   const current_directory_path = global_state.current_directory
   const dictionary = global_state.map
   const dispatch = useDispatch();
-  console.log("aaa", current_directory_path)
-
-  const current_directory = useMemo(() => map.get_directory_by_name(current_directory_path.path), [dictionary, current_directory_path])
-  console.log(current_directory.sub_directories.length + current_directory.messages.length)
-  
-  return (<div className={styles.Dictionary} data-testid="Dictionary">
+  const current_directory = useMemo(() => map.get_directory_by_name(current_directory_path.path, dictionary.map), [dictionary, current_directory_path])
+  return (<div className={styles.Dictionary} style={{cursor: 'pointer'}} data-testid="Dictionary">
     {<div className='container'>
         {current_directory_path.path}
         <br/>

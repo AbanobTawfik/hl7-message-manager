@@ -4,7 +4,6 @@ import return_status from '../types/return_status.ts'
 import hasher from './hash.ts'
 import { write_file } from "../services/database.ts"
 
-
 let dictionary: Map<number, directory> = new Map<number, directory>()
 
 
@@ -23,7 +22,7 @@ export function get_directory_by_name(path: string): directory {
     return dictionary.get(h)
 }
 
-export function get_directory_path(directory: directory): string{
+export function get_directory_path(directory: directory): string {
     return get_path_from_root(directory);
 }
 
@@ -178,19 +177,29 @@ export function modify_directory(
 
 // modify any aspect of the message you please
 export function modify_message(
-    directory: directory,
     message: message,
     raw_message: string = "",
     comserver: string = "",
     scripts: string[] = [],
     description: string = ""
 ): return_status {
+    let directory: directory = get_directory_by_name(message.directory_path)
     let hash_value_directory: number = hasher.hash(directory)
     if (!dictionary.has(hash_value_directory)) {
         return { status: false, message: "directory doesn't exist!" }
     }
     // try retrieve this message
-    let message_index: number = directory.messages.indexOf(message)
+    let message_index: number = -1;
+    for (let i = 0; i < directory.messages.length; i++) {
+        if (directory.messages[i].comserver === message.comserver &&
+            directory.messages[i].description === message.description &&
+            JSON.stringify(directory.messages[i].scripts) === JSON.stringify(message.scripts) &&
+            directory.messages[i].raw_message === message.raw_message) {
+            message_index = i;
+            break;
+        }
+    }
+    console.log(message_index)
     if (message_index === -1) {
         return {
             status: false,
@@ -199,16 +208,17 @@ export function modify_message(
         }
     }
     // remove old unmodified message
-    directory.messages.splice(message_index, 1)
-
+    let copy_messages = Array.from(directory.messages)
+    copy_messages.splice(message_index, 1)
+    directory.messages = copy_messages
+    let new_message: message = {}
     message.comserver = comserver == null ? message.comserver : comserver
     message.raw_message =
         raw_message == null ? message.raw_message : raw_message
     message.scripts = scripts == null ? message.scripts : scripts
     message.description =
         description == null ? message.description : description
-
-    directory.messages.push(message)
+    console.log("message val", message)
     write_file(dictionary)
 
     return { status: true, message: 'message has been modified!' }
@@ -222,7 +232,7 @@ export function get_all_messages(directory: directory): message[] {
     return directory.messages
 }
 
-export function get_all_directories_from_current(name: string): directory[]{
+export function get_all_directories_from_current(name: string): directory[] {
     let hash_value_directory: number = hasher.hash(name)
     if (!dictionary.has(hash_value_directory)) {
         return [];

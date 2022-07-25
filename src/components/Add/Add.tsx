@@ -6,7 +6,7 @@ import add_icon from '../../resources/Icons/add.png'
 interface AddProps {}
 
 const Add: FC<AddProps> = () => (
-  <div className={styles.Add} data-testid="Add">
+  <div className={styles.Add} style={{cursor: 'pointer'}} data-testid="Add">
     <img className="img-fluid .resize" src={add_icon} />
     Add
   </div>    
