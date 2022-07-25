@@ -1,3 +1,4 @@
+// @ts-ignore
 import global_variables from '../globals/global_variables.ts'
 import directory from '../types/directory'
 import { stringify, parse } from 'circular-json'
@@ -7,6 +8,7 @@ let database_object: Map<number, directory>
 // only used on start up
 export function read_file(): Map<number, directory> {
   // if file doesnt exist we will create it
+  // @ts-ignore
   let data: string = window.localStorage.getItem(global_variables.dictionary_name)
   if (data == null) {
     let write_object: any = new Map<number, directory>()
@@ -35,8 +37,8 @@ export function write_file(
 ): boolean {
   let object: any = {}
   object[global_variables.dictionary_name] = dictionary
-  let write_output = stringify(Array.from(dictionary.entries()))
   console.log(dictionary)
+  let write_output = stringify(Array.from(dictionary.entries()))
   window.localStorage.setItem(global_variables.dictionary_name, write_output)
   return true
 }
@@ -51,5 +53,3 @@ export function read_current_directory() {
   }
   return window.localStorage.getItem(global_variables.current_directory)
 }
-
-export default database_object

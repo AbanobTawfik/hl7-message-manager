@@ -5,56 +5,56 @@ import { enableMapSet } from 'immer';
 import { stringify, parse } from 'circular-json'
 
 enableMapSet();
-mapper.load_dictionary_from_storage(dba.read_file());
-let initial_map = mapper.get_dictionary();
+let initial_map = stringify(Array.from(dba.read_file().entries()));
+console.log("map",initial_map)
 const slice = createSlice({
     name: "map",
     initialState: {
-        map: initial_map
+        map_string: initial_map
     },
     reducers: {
         add_directory: (state, action) => {
-            let check = mapper.add_directory(action.payload.parent_directory, action.payload.name);
+            let check = mapper.add_directory(parse(current(state.map)), action.payload.parent_directory, action.payload.name);
             if(check.status){
-                state.map = parse(stringify(mapper.get_dictionary()));
+                return stringify(Array.from(check.map.entries()));
             }
         },
 
         add_message: (state, action) => {
-            let check = mapper.add_message(action.payload.directory, action.payload.comserver, action.scripts, action.payload.description, action.payload.raw_message)
+            let check = mapper.add_message(parse(current(state.map)), action.payload.directory, action.payload.comserver, action.scripts, action.payload.description, action.payload.raw_message)
             if(check.status){
-                state.map = parse(stringify(mapper.get_dictionary()));
+                return stringify(Array.from(check.map.entries()));
             }
         },
         
         remove_directory: (state, action) => {
-            let check = mapper.remove_directory(action.payload.directory);
+            let check = mapper.remove_directory(parse(current(state.map)), action.payload.directory);
             if(check.status){
-                state.map = mapper.get_dictionary();
+                return stringify(Array.from(check.map.entries()));
             }
         },
         
         remove_message: (state, action) => {
-            let check = mapper.remove_message(action.payload.directory, action.payload.message);
+            let check = mapper.remove_message(parse(current(state.map)), action.payload.directory, action.payload.message);
             if(check.status){
-                state.map = mapper.get_dictionary();
+                return stringify(Array.from(check.map.entries()));
             }
         },
         
         modify_directory: (state, action) => {
-            let check = mapper.modify_directory(action.payload.directory, action.payload.name);
+            let map_to_use = new Map(parse(state.map_string))
+            let check = mapper.modify_directory(parse(current(state.map)), action.payload.directory, action.payload.name);
             if(check.status){
-                return mapper.get_dictionary();
+                return stringify(Array.from(check.map.entries()));
             }
         },
         
         modify_message: (state, action) => {
-            console.log(mapper)
-            console.log(current(state))
-            console.log(state)
-            let check = mapper.modify_message(action.payload.message, action.payload.raw_message, action.payload.comserver, action.payload.scripts, action.payload.description);
+            let map_to_use = new Map(parse(state.map_string))
+            let check = mapper.modify_message(map_to_use, action.payload.message, action.payload.raw_message, action.payload.comserver, action.payload.scripts, action.payload.description);
             if(check.status){
-                return mapper.get_dictionary();
+                console.log(check)
+                state.map_string = stringify(Array.from(check.map.entries()));
             }
         },
     }

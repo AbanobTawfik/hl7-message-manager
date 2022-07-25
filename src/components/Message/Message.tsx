@@ -21,11 +21,7 @@ export function Message({ message }) {
   const [is_editing, toggle_edit] = useState(false);
   const global_state = useSelector((state) => state);
   // @ts-ignore
-  const current_directory_path = global_state.current_directory
-  // @ts-ignore
   const dictionary = global_state.map
-  
-  const current_directory = useMemo(() => map.get_directory_by_name(current_directory_path.path), [dictionary, current_directory_path])
   
   const dispatch = useDispatch();
 
@@ -64,6 +60,17 @@ export function Message({ message }) {
                                     // @ts-ignore
                                     description: modify_description.current.value}
     dispatch(modify_message(modify_message_payload))
+    toggle_edit(false)
+    toast.dismiss();
+    toast('Changes have been saved!', {
+      position: "top-center",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
   };
   return (<div className={styles.Message} data-testid="Message" style={{ cursor: 'pointer' }}>
     <img className="img-fluid" src={message_icon} onClick={() => { toggle_modal(true) }} />
@@ -115,6 +122,7 @@ export function Message({ message }) {
               <Col xs={12} md={6} lg={2} xl={10} sm={6} style={{ cursor: 'pointer' }} onClick={modify_message_dispatch}>
                 Save
                 <br />
+                <ToastContainer />
                 <FaSave style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
               </Col>
             </Row>
@@ -147,6 +155,7 @@ export function Message({ message }) {
                 disabled={!is_editing}
                 // @ts-ignore
                 ref={modify_scripts}
+                style={{height:'500px'}}
               />
             </Form.Group>
             <Form.Group
@@ -159,6 +168,7 @@ export function Message({ message }) {
                 disabled={!is_editing}
                 // @ts-ignore
                 ref={modify_data}
+                style={{height:'auto'}}
               />
             </Form.Group>
           </Container>

@@ -6,11 +6,12 @@ import Folder from '../Folder/Folder.tsx'
 // @ts-ignore
 import * as dba from "../../services/database.ts"
 // @ts-ignore
-import * as map from "../../services/dictionary.ts"
+import * as mapper from "../../services/dictionary.ts"
 // @ts-ignore
 import Window from "../Window/Window.tsx"
 import {useSelector, useDispatch} from 'react-redux'
 import {change_current_directory} from '../../state/slices/current_directory_slice.js'
+import { stringify, parse } from 'circular-json'
 
 interface DictionaryProps { }
 
@@ -21,9 +22,12 @@ export function Dictionary(DictionaryProps) {
   // @ts-ignore
   const current_directory_path = global_state.current_directory
   // @ts-ignore
-  const dictionary = global_state.map
+  console.log("ERRR", global_state.map.map_string)
+  // @ts-ignore
+  const dictionary:Map<number, directory> = new Map(parse(global_state.map.map_string))
+  console.log(dictionary)
   const dispatch = useDispatch();
-  const current_directory = useMemo(() => map.get_directory_by_name(current_directory_path.path, dictionary.map), [dictionary, current_directory_path])
+  const current_directory = mapper.get_directory_by_name(dictionary, current_directory_path.path)
   return (<div className={styles.Dictionary} style={{cursor: 'pointer'}} data-testid="Dictionary">
     {<div className='container'>
         {current_directory_path.path}
