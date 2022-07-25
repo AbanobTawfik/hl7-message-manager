@@ -1,6 +1,9 @@
 import React, { FC, useState, useMemo } from 'react';
+// @ts-ignore
 import styles from './Message.module.scss';
+// @ts-ignore
 import message from '../../types/message.ts'
+// @ts-ignore
 import message_icon from '../../resources/Icons/message.png'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -8,6 +11,7 @@ import { Modal, Button, Row, Container, Col, Form } from 'react-bootstrap';
 import { FaCopy, FaEdit, FaSave, FaEye } from 'react-icons/fa'
 import { useDispatch, useSelector } from 'react-redux'
 import {modify_message} from '../../state/slices/map_slice.js'
+// @ts-ignore
 import * as map from "../../services/dictionary.ts"
 
 
@@ -16,7 +20,9 @@ export function Message({ message }) {
   const [is_open, toggle_modal] = useState(false);
   const [is_editing, toggle_edit] = useState(false);
   const global_state = useSelector((state) => state);
+  // @ts-ignore
   const current_directory_path = global_state.current_directory
+  // @ts-ignore
   const dictionary = global_state.map
   
   const current_directory = useMemo(() => map.get_directory_by_name(current_directory_path.path), [dictionary, current_directory_path])
@@ -35,9 +41,12 @@ export function Message({ message }) {
   const modify_message_dispatch = () => {
     // clean up the scripts into array
     let array_scripts:any[] = []
+    // @ts-ignore
     if (modify_scripts.current.value !== "") {
+      // @ts-ignore
       array_scripts = modify_scripts.current.value.split("\n")
       if (array_scripts.length == 1) {
+        // @ts-ignore
         array_scripts = modify_scripts.current.value.split(",")
       }
     }
@@ -47,9 +56,12 @@ export function Message({ message }) {
     console.log(message)
     
     const modify_message_payload = {message: message, 
+                                   // @ts-ignore
                                     raw_message: modify_data.current.value,
+                                    // @ts-ignore
                                     comserver: modify_interface.current.value,
                                     scripts: array_scripts,
+                                    // @ts-ignore
                                     description: modify_description.current.value}
     dispatch(modify_message(modify_message_payload))
   };
@@ -115,6 +127,7 @@ export function Message({ message }) {
               <Form.Control
                 defaultValue={message.comserver}
                 disabled={!is_editing}
+                // @ts-ignore
                 ref={modify_interface}
               />
             </Form.Group>
@@ -123,6 +136,7 @@ export function Message({ message }) {
               <Form.Control
                 defaultValue={message.description}
                 disabled={!is_editing}
+                // @ts-ignore
                 ref={modify_description}
               />
             </Form.Group>
@@ -131,6 +145,7 @@ export function Message({ message }) {
               <Form.Control as="textarea"
                 defaultValue={all_scripts_string}
                 disabled={!is_editing}
+                // @ts-ignore
                 ref={modify_scripts}
               />
             </Form.Group>
@@ -142,6 +157,7 @@ export function Message({ message }) {
               <Form.Control as="textarea"
                 defaultValue={message.raw_message}
                 disabled={!is_editing}
+                // @ts-ignore
                 ref={modify_data}
               />
             </Form.Group>

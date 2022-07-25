@@ -1,15 +1,24 @@
 import React, { FC } from 'react';
+// @ts-ignore
 import directory from '../../types/directory.ts';
+// @ts-ignore
 import styles from './Window.module.scss';
+// @ts-ignore
 import Folder from '../Folder/Folder.tsx'
+// @ts-ignore
 import Message from '../Message/Message.tsx'
+// @ts-ignore
 import hasher from '../../services/hash.ts'
+// @ts-ignore
 import Add from '../Add/Add.tsx'
 
 export function Window({ current_directory }) {
   let all_subs_and_messages = []
+  // @ts-ignore
   all_subs_and_messages.push(...current_directory.sub_directories)
+  // @ts-ignore
   all_subs_and_messages.push(...current_directory.messages)
+  // @ts-ignore
   all_subs_and_messages.push("final item")
   const rows = [...Array(Math.ceil((all_subs_and_messages.length + 1) / 6))]
   const entryRows = rows.map((row, idx) => all_subs_and_messages.slice(idx * 6, idx * 6 + 6))
@@ -28,7 +37,9 @@ export function Window({ current_directory }) {
                 const key_value = hasher.hash(entry)
                 return entry == "final item"? <div className="col-xl-1 col-lg-2 col-md-3 col-sm-6 col-12" key={"FINAL ITEM"}>
                 <Add />
-              </div> :((entry.type === "message" ? <div className="col-xl-1 col-lg-2 col-md-3 col-sm-6 col-12" key={key_value}>
+              </div> :(( 
+                      // @ts-ignore
+                      entry.type === "message" ? <div className="col-xl-1 col-lg-2 col-md-3 col-sm-6 col-12" key={key_value}>
                   <Message message={entry} />
                 </div>
                   :

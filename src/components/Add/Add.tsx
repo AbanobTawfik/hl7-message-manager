@@ -1,6 +1,8 @@
 import React, { FC } from 'react';
+// @ts-ignore
 import styles from './Add.module.scss';
 import './Add.module.scss'
+// @ts-ignore
 import add_icon from '../../resources/Icons/add.png'
 
 interface AddProps {}
