@@ -5,7 +5,6 @@ import Dictionary from './components/Dictionary/Dictionary.tsx'
 import {bindActionCreators} from 'redux'
 
 function App() {
-  console.log("NOT RERENDERING AGAIN")
   return (
     <div className='App' id="APPJS">
       <header className='App-header'>

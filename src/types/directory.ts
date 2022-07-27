@@ -6,6 +6,7 @@ type directory = {
   sub_directories: directory[]
   messages: message[]
   type: string
+  id: string
 }
 
 export default directory

@@ -22,10 +22,7 @@ export function Dictionary(DictionaryProps) {
   // @ts-ignore
   const current_directory_path = global_state.current_directory
   // @ts-ignore
-  console.log("ERRR", global_state.map.map_string)
-  // @ts-ignore
   const dictionary:Map<number, directory> = new Map(parse(global_state.map.map_string))
-  console.log(dictionary)
   const dispatch = useDispatch();
   const current_directory = mapper.get_directory_by_name(dictionary, current_directory_path.path)
   return (<div className={styles.Dictionary} style={{cursor: 'pointer'}} data-testid="Dictionary">

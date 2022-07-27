@@ -5,6 +5,7 @@ type message = {
   description: string
   raw_message: string
   type: string
+  id: string
 }
 
 export default message
