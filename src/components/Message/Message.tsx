@@ -5,7 +5,7 @@ import styles from './Message.module.scss';
 import message from '../../types/message.ts'
 // @ts-ignore
 import message_icon from '../../resources/Icons/message.png'
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Modal, Button, Row, Container, Col, Form } from 'react-bootstrap';
 import { FaCopy, FaEdit, FaSave, FaEye } from 'react-icons/fa'
@@ -22,8 +22,6 @@ function useHookWithRefCallBack(ref) {
   }, [ref])
   return set_scripts_ref
 }
-
-
 
 export function Message({ message }) {
   const { show } = useContextMenu({
@@ -85,35 +83,13 @@ export function Message({ message }) {
         description: modify_description.current.value
       }
       dispatch(modify_message(modify_message_payload))
-      console.log("WE DISPATCHED")
       toggle_save(false)
       toggle_edit(false)
-      toast.dismiss();
-      toast('Changes have been saved!', {
-        position: "top-center",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
     }
   };
 
   const remove_message_dispatch = () => {
     dispatch(remove_message({ message: message }))
-    console.log("WE DISPATCHED")
-    toast.dismiss();
-    toast('Message was deleted!', {
-      position: "top-center",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
   }
 
   const view_change = () => {
@@ -124,24 +100,19 @@ export function Message({ message }) {
     toggle_modal(true)
     toggle_edit(true)
   }
-  
+
   const handleContextMenu = useCallback((event) => {
-    if(is_open){
+    if (is_open) {
       return
     }
     event.preventDefault();
     show(event)
   }, [is_open, message.id])
 
-  let form_data = {
-    interface: message.comserver,
-    scripts: all_scripts_string,
-    description: message.description,
-    raw_data: message.raw_message,
-  }
   return (
-    <div className={styles.Message} data-testid="Message" style={{ cursor: 'pointer' }} onContextMenu={handleContextMenu}>
-      <img className="img-fluid" src={message_icon} onClick={() => { toggle_modal(true) }} />
+    <div className={styles.Message} data-testid="Message" >
+      <img className="img-fluid" style={{cursor: 'pointer', maxHeight:"100px", maxWidth:"100px"}} onContextMenu={handleContextMenu} src={message_icon} onClick={() => { toggle_modal(true) }} />
+      <br/>
       {message.description}
       {<Modal
         show={is_open}
@@ -156,19 +127,19 @@ export function Message({ message }) {
               <Modal.Title>{!is_editing && "File View"} {is_editing && "File Edit"}</Modal.Title>
             </Row>
             <hr />
-            <Row style={{fontSize:"0.98rem"}}>
+            <Row style={{ fontSize: "0.98rem" }}>
               <Col xs={12} md={6} lg={2} xl={10} sm={6} style={{ cursor: 'pointer' }} onClick={() => {
-                toast.dismiss();
                 navigator.clipboard.writeText(message.raw_message.replace(/(\r\n|\r)/gm, "\r"));
-                console.log("HIH")
-                toast('Data Copied to Clipboard', {
+                toast.dismiss(); 
+                toast.success('Data Copied to Clipboard', {
                   position: "top-center",
-                  autoClose: 1000,
+                  autoClose: 2000,
                   hideProgressBar: false,
                   closeOnClick: true,
                   pauseOnHover: false,
                   draggable: true,
                   progress: undefined,
+                  theme: 'dark'
                 });
               }}
               >
@@ -177,7 +148,7 @@ export function Message({ message }) {
 
                 <FaCopy style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
               </Col>
-              <Col xs={12} md={6} lg={2} xl={10} sm={6} style={{ cursor: 'pointer' }} onClick={() => { toggle_edit(!is_editing) }}>
+              <Col xs={12} md={6} lg={2} xl={10} sm={6} style={{ cursor: 'pointer' }} onClick={() => {toggle_edit(!is_editing) }}>
                 {!is_editing && "Edit"}
                 {is_editing && "View"}
                 <br />
@@ -196,87 +167,88 @@ export function Message({ message }) {
         </Modal.Header>
         <Modal.Body>
           {is_editing && <Form>
-
             <Container>
+
               <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                <Form.Label>Interface</Form.Label>
-                <Form.Control
-                  defaultValue={message.comserver}
-                  ref={modify_interface_ref}
-                  onChange={() => { toggle_save(check_message_changes()) }}
-                />
-              </Form.Group>
-              <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                <Form.Label>Message Description <b>* (required)</b></Form.Label>
+                <Form.Label style={{ fontWeight: 800 }}> Message Description* (required)</Form.Label>
                 <Form.Control
                   required
                   defaultValue={message.description}
                   ref={modify_description_ref}
+                  style={{ fontWeight: 300, minHeight:"2.4rem" }}
+                  onChange={() => { toggle_save(check_message_changes()) }}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                <Form.Label style={{ fontWeight: 800 }}>Interface</Form.Label>
+                <Form.Control
+                  defaultValue={message.comserver}
+                  ref={modify_interface_ref}
+                  style={{ fontWeight: 300, minHeight:"2.4rem" }}
                   onChange={() => { toggle_save(check_message_changes()) }}
                 />
               </Form.Group>
               <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
-                <Form.Label>Scripts</Form.Label>
+                <Form.Label style={{ fontWeight: 800 }}>Scripts</Form.Label>
                 <Form.Control as="textarea"
                   defaultValue={all_scripts_string}
                   ref={modify_scripts_ref}
-                  style={{ overflow: 'hidden' }}
-                  onChange={() => { toggle_save(check_message_changes()); modify_scripts.current.style.height = modify_scripts.current.scrollHeight + "px" }}
+                  style={{ minHeight: "5rem", overflow: 'hidden', fontWeight: 300 }}
+                  onChange={() => { toggle_save(check_message_changes()); modify_scripts.current.style.height = "0px"; modify_scripts.current.style.height = modify_scripts.current.scrollHeight + "px" }}
                 />
               </Form.Group>
               <Form.Group
                 className="mb-3"
                 controlId="exampleForm.ControlTextarea1"
               >
-                <Form.Label>Data</Form.Label>
+                <Form.Label style={{ fontWeight: 800 }}>Data</Form.Label>
                 <Form.Control as="textarea"
                   defaultValue={message.raw_message}
                   // @ts-ignore
                   ref={modify_data_ref}
-                  style={{ overflow: 'hidden' }}
-                  onChange={() => { toggle_save(check_message_changes()); modify_data.current.style.height = modify_data.current.scrollHeight + "px" }}
+                  style={{ minHeight: "5rem", overflow: 'hidden', fontWeight: 300 }}
+                  onChange={() => { toggle_save(check_message_changes()); modify_data.current.style.height = "0px";modify_data.current.style.height = modify_data.current.scrollHeight + "px" }}
                 />
               </Form.Group>
             </Container>
           </Form>}
-          {!is_editing && <div><Container>
-                                <Row style={{fontWeight:800}}>
-                                    Description
-                                </Row>
-                                <Row>
-                                  {message.description}
-                                </Row>
-                                <div className={styles.astrodivider}><div className={styles.astrodividermask}></div><span><i>&#10038;</i></span></div>
-                                <Row style={{fontWeight:800}}>
-                                    Interface
-                                </Row>
-                                <Row>
-                                  {message.comserver}
-                                </Row>
-                                <div className={styles.astrodivider}><div className={styles.astrodividermask}></div><span><i>&#10038;</i></span></div>
-                                <Row style={{fontWeight:800}}>
-                                    Scripts
-                                </Row>
-                                <Row style={{whiteSpace: "pre-line"}}>
-                                  {all_scripts_string}
-                                </Row>
-                                <div className={styles.astrodivider}><div className={styles.astrodividermask}></div><span><i>&#10038;</i></span></div>
-                                <Row style={{fontWeight:800}}>
-                                    Data
-                                </Row>
-                                <Row style={{whiteSpace: "pre-line"}}>
-                                  {message.raw_message}
-                                </Row>
-                                <div className={styles.astrodivider}><div className={styles.astrodividermask}></div><span><i>&#10038;</i></span></div>
-                          </Container></div>}
+          {!is_editing && <div><Container >
+            <Row style={{ fontWeight: 800 }}>
+              Description
+            </Row>
+            <Row style={{ fontWeight: 300 }}>
+              {message.description}
+            </Row>
+            <div className={styles.astrodivider}><div className={styles.astrodividermask}></div><span><i>&#10038;</i></span></div>
+            <Row style={{ fontWeight: 800 }}>
+              Interface
+            </Row>
+            <Row style={{ fontWeight: 300 }}>
+              {message.comserver}
+            </Row>
+            <div className={styles.astrodivider}><div className={styles.astrodividermask}></div><span><i>&#10038;</i></span></div>
+            <Row style={{ fontWeight: 800 }}>
+              Scripts
+            </Row>
+            <Row style={{ whiteSpace: "pre-line", fontWeight: 300 }}>
+              {all_scripts_string}
+            </Row>
+            <div className={styles.astrodivider}><div className={styles.astrodividermask}></div><span><i>&#10038;</i></span></div>
+            <Row style={{ fontWeight: 800 }}>
+              Data
+            </Row>
+            <Row style={{ whiteSpace: "pre-line", fontWeight: 300 }}>
+              {message.raw_message}
+            </Row>
+            <div className={styles.astrodivider}><div className={styles.astrodividermask}></div><span><i>&#10038;</i></span></div>
+          </Container></div>}
         </Modal.Body>
       </Modal>}
-      {!is_open &&<Menu id={message.id}>
+      {!is_open && <Menu id={message.id}>
         <Item onClick={view_change}>View</Item>
         <Item onClick={edit_change}>Edit</Item>
         <Item onClick={remove_message_dispatch}>Remove</Item>
       </Menu>}
-      <ToastContainer />
 
     </div>
   );

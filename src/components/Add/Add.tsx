@@ -5,7 +5,6 @@ import './Add.module.scss'
 // @ts-ignore
 import add_icon from '../../resources/Icons/add.png'
 import { Modal, Button, Row, Container, Col, Form } from 'react-bootstrap';
-import { ToastContainer, toast } from 'react-toastify';
 import { FaFolderPlus, FaFileUpload, FaSave, FaEye } from 'react-icons/fa'
 import { useDispatch, useSelector } from 'react-redux'
 import { add_directory, add_message } from '../../state/slices/map_slice.js'
@@ -61,10 +60,9 @@ export function Add() {
           comserver: add_interface.current.value,
           scripts: array_scripts,
           // @ts-ignore
-          description: add_description.current.value
+          description: add_description.current.value,
         }
         dispatch(add_message(add_message_payload))
-        console.log("WE DISPATCHED")
         // clear inputs
         add_data.current.value = ""
         add_description.current.value = ""
@@ -75,17 +73,17 @@ export function Add() {
         form_data.raw_data = ""
         form_data.interface = ""
         toggle_save(false)
-        toast.dismiss();
-        toast('Message was Added!', {
-          position: "top-center",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
       } else {
+        const add_directory_payload = {
+          parent_directory_path: current_directory_path.path,
+          // @ts-ignore
+          name: add_directory_name.current.value,
+        }
+        dispatch(add_directory(add_directory_payload))
+        // clear inputs
+        add_directory_name.current.value = ""
+        form_data.directory_name = ""
+        toggle_save(false)
         // add message callback
         // require that description is filled in
       }
@@ -96,7 +94,8 @@ export function Add() {
 
   return (
     <div className={styles.Add} style={{ cursor: 'pointer' }} data-testid="Add">
-      <img className="img-fluid .resize" src={add_icon} onClick={() => { toggle_modal(true) }} />
+      <img className="img-fluid .resize" style={{maxHeight:"100px", maxWidth:"100px"}} src={add_icon} onClick={() => { toggle_modal(true) }} />
+      <br/>
       Add
       {<Modal
         show={is_open}
@@ -107,19 +106,18 @@ export function Add() {
         <Form>
           <Modal.Header closeButton className="show-grid">
 
-            <Container>
+            <Container className={styles.Add}>
               <Row>
                 <Modal.Title>{adding_file && "Add File"} {!adding_file && "Add Folder"} </Modal.Title>
               </Row>
               <hr />
-              <Row>
+              <Row style={{ fontSize: "0.98rem" }}>
                 <Col xs={12} md={6} lg={2} xl={10} sm={6} style={{ cursor: 'pointer' }} onClick={() => {
                   toggle_save(form_data.description != "")
                   toggle_adding_file(true)
                 }}>
                   File
                   <br />
-                  <ToastContainer />
                   <FaFileUpload style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
                 </Col>
                 <Col xs={12} md={6} lg={2} xl={10} sm={6} style={{ cursor: 'pointer' }} onClick={() => {
@@ -128,13 +126,11 @@ export function Add() {
                 }}>
                   Folder
                   <br />
-                  <ToastContainer />
                   <FaFolderPlus style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
                 </Col>
                 <Col xs={12} md={6} lg={2} xl={10} sm={6} style={{ cursor: is_saveable ? 'pointer' : 'not-allowed' }} onClick={send_message_or_file}>
                   Save
                   <br />
-                  <ToastContainer />
                   <FaSave style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
                 </Col>
               </Row>
@@ -143,34 +139,38 @@ export function Add() {
           {adding_file && <Modal.Body>
             <Container>
               <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                <Form.Label><b>Interface</b></Form.Label>
-                <Form.Control
-                  // @ts-ignore
-                  ref={add_interface}
-                  defaultValue={form_data.interface}
-                  onChange={() => { form_data.interface = add_interface.current.value }}
-                />
-              </Form.Group>
-              <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                <Form.Label><b>Message Description* (required)</b></Form.Label>
+                <Form.Label style={{ fontWeight: 800 }}>Message Description* (required)</Form.Label>
                 <Form.Control
                   // @ts-ignore
                   ref={add_description}
                   defaultValue={form_data.description}
+                  style={{ fontWeight: 300, minHeight: "2.4rem" }}
                   onChange={() => { form_data.description = add_description.current.value; toggle_save(adding_file && add_description.current.value != "") }}
                 // onChange={toggle_save(adding_file && add_description.current.value != "")}
                 />
               </Form.Group>
+              <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                <Form.Label style={{ fontWeight: 800 }}>Interface</Form.Label>
+                <Form.Control
+                  // @ts-ignore
+                  ref={add_interface}
+                  defaultValue={form_data.interface}
+                  style={{ fontWeight: 300, minHeight: "2.4rem" }}
+                  onChange={() => { form_data.interface = add_interface.current.value }}
+                />
+              </Form.Group>
               <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
-                <Form.Label><b>Scripts</b></Form.Label>
+                <Form.Label style={{ fontWeight: 800 }}>Scripts</Form.Label>
                 <Form.Control as="textarea"
                   // @ts-ignore
                   ref={add_scripts}
                   style={{ overflow: 'hidden' }}
                   defaultValue={form_data.scripts}
+                  style={{ minHeight: "5rem", overflow: 'hidden', fontWeight: 300 }}
                   onChange={() => {
                     form_data.scripts = add_scripts.current.value;
-                    add_scripts.current.style.height = ""; add_scripts.current.style.height = add_scripts.current.scrollHeight + "px"
+                    add_scripts.current.style.height = "0px"
+                    add_scripts.current.style.height = add_scripts.current.scrollHeight + "px"
                   }}
                 />
               </Form.Group>
@@ -178,14 +178,15 @@ export function Add() {
                 className="mb-3"
                 controlId="exampleForm.ControlTextarea1"
               >
-                <Form.Label><b>Data</b></Form.Label>
+                <Form.Label style={{ fontWeight: 800 }}>Data</Form.Label>
                 <Form.Control as="textarea"
                   // @ts-ignore
                   ref={add_data}
-                  style={{ overflow: 'hidden' }}
+                  style={{ minHeight: "5rem", overflow: 'hidden', fontWeight: 300 }}
                   defaultValue={form_data.raw_data}
                   onChange={() => {
                     form_data.raw_data = add_data.current.value;
+                    add_data.current.style.height = "0px"
                     add_data.current.style.height = add_data.current.scrollHeight + "px"
                   }}
                 />
@@ -196,7 +197,7 @@ export function Add() {
           {!adding_file && <Modal.Body>
             <Container>
               <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                <Form.Label><b>Directory Name* (required)</b></Form.Label>
+                <Form.Label style={{ fontWeight: 800 }}>Directory Name* (required)</Form.Label>
                 <Form.Control
                   // @ts-ignore
                   ref={add_directory_name}

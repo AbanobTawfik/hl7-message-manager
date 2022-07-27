@@ -40,7 +40,7 @@
 
 @media (max-width:1280px) {
     .Message {
-        font-size: 0.5rem;
+        font-size: 0.8rem;
         overflow-wrap: break-word
     }
 }
@@ -54,7 +54,7 @@
 
 
 .astrodivider {
-    margin: 2.5rem auto;
+    margin: 1.4rem auto;
     width: 400px;
     max-width: 100%;
     position: relative;
@@ -62,16 +62,16 @@
 
 .astrodividermask {
     overflow: hidden;
-    height: 20px;
+    height: 1.1rem;
 }
 
 .astrodividermask:after {
     content: '';
     display: block;
-    margin: -25px auto 0;
+    margin: -1.6rem auto 0;
     width: 100%;
-    height: 25px;
-    border-radius: 125px / 12px;
+    height: 1.6rem;
+    border-radius: 6.8rem / 1.3rem;
     box-shadow: 0 0 8px #040404;
 }
 

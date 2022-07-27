@@ -11,7 +11,7 @@ import Message from '../Message/Message.tsx'
 import hasher from '../../services/hash.ts'
 // @ts-ignore
 import Add from '../Add/Add.tsx'
-
+import {ToastContainer} from 'react-toastify'
 export function Window({ current_directory }) {
   let all_subs_and_messages = []
   // @ts-ignore
@@ -32,17 +32,17 @@ export function Window({ current_directory }) {
       {
         entryRows.map((row, index) => {
           return (
-            <div className="row" key={index} id={"row".concat(index.toString())}>
+            <div className="row" style={{minWidth:"40rem"}} key={index} id={"row".concat(index.toString())}>
               {row.map((entry) => {
-                return entry == "final item" ? <div className="col-xl-1 col-lg-2 col-md-3 col-sm-6 col-12" key={"FINAL ITEM"}>
+                return entry == "final item" ? <div className="col-xl-2 col-lg-2 col-md-2 col-sm-6 col-12" key={"FINAL ITEM"}>
                   <Add />
                 </div> : ((
                   // @ts-ignore
-                  entry.type === "message" ? <div className="col-xl-1 col-lg-2 col-md-3 col-sm-6 col-12" key={entry.id}>
+                  entry.type === "message" ? <div className="col-xl-2 col-lg-2 col-md-2 col-sm-6 col-12" key={entry.id}>
                     <Message message={entry} />
                   </div>
                     :
-                    <div className="col-xl-1 col-lg-2 col-md-3 col-sm-6 col-12" key={entry.id}>
+                    <div className="col-xl-2 col-lg-2 col-md-2 col-sm-6 col-12" key={hasher.hash(entry)}>
                       <Folder folder={entry} />
                     </div>))
               })
@@ -52,6 +52,7 @@ export function Window({ current_directory }) {
         })
       }
     </div>
+    <ToastContainer />
   </div >)
   return view;
 }
