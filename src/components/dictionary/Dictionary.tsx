@@ -25,12 +25,10 @@ export function Dictionary(DictionaryProps) {
   const dictionary:Map<number, directory> = new Map(parse(global_state.map.map_string))
   const dispatch = useDispatch();
   const current_directory = mapper.get_directory_by_name(dictionary, current_directory_path.path)
-  return (<div className={styles.Dictionary} style={{cursor: 'pointer'}} data-testid="Dictionary">
+  return (<div className={styles.Dictionary} data-testid="Dictionary">
     {<div className='container'>
         {current_directory_path.path}
-        <br/>
-        <button onClick={() =>  {dispatch(change_current_directory("root/test"))} }></button>
-        <button onClick={() => {dispatch(change_current_directory("root"))}}></button>
+        
         {<Window current_directory={current_directory}/>}
     </div>}
   </div>);

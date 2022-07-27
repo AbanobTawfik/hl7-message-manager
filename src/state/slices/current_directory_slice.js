@@ -11,6 +11,7 @@ const slice = createSlice({
     },
     reducers:{
         change_current_directory: (state, action) => {
+            console.log(action.payload)
             dba.write_current_directory(action.payload);
             state.path = action.payload
         }

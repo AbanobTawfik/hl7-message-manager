@@ -59,9 +59,8 @@ export function add_directory(
     name: string
 ): return_status {
     let parent_directory = get_directory_by_name(dictionary, parent_directory_path)
-    let parent_directory_copy = parse(stringify(parent_directory))
     let add: directory = {
-        parent_directory: parent_directory_copy,
+        parent_directory: parent_directory,
         sub_directories: [],
         name: name,
         messages: [],
@@ -74,8 +73,8 @@ export function add_directory(
         return { map: dictionary, status: false, message: 'Directory path already exists' }
     }
     // set the subdirectory of the parent to the new directory
-    parent_directory_copy.sub_directories.push(add)
-
+    parent_directory.sub_directories.push(add)
+    
     dictionary = dictionary.set(hash_value, add)
     write_file(dictionary)
     return { map: dictionary, status: true, message: 'Success' }

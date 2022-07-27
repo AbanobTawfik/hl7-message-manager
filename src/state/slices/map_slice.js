@@ -3,8 +3,18 @@ import * as mapper from "../../services/dictionary.ts"
 import * as dba from "../../services/database.ts"
 import { enableMapSet } from 'immer';
 import { stringify, parse } from 'circular-json'
-
+import {toast} from 'react-toastify'
 enableMapSet();
+const toast_settings = {
+    position: "top-center",
+    autoClose: 2000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: 'dark'
+  }
 let initial_map = stringify(Array.from(dba.read_file().entries()));
 const slice = createSlice({
     name: "map",
@@ -13,9 +23,15 @@ const slice = createSlice({
     },
     reducers: {
         add_directory: (state, action) => {
-            let check = mapper.add_directory(parse(current(state.map)), action.payload.parent_directory_path, action.payload.name);
+            let map_to_use = new Map(parse(state.map_string))
+            let check = mapper.add_directory(map_to_use, action.payload.parent_directory_path, action.payload.name);
             if(check.status){
+                toast.dismiss()
+                toast.success('Directory was added!', toast_settings);
                 state.map_string = stringify(Array.from(check.map.entries()));
+            }else{
+                toast.dismiss()
+                toast.error(check.message, toast_settings)
             }
         },
 
@@ -23,15 +39,26 @@ const slice = createSlice({
             let map_to_use = new Map(parse(state.map_string))
             let check = mapper.add_message(map_to_use, action.payload.directory_path, action.payload.comserver, action.scripts, action.payload.description, action.payload.raw_message)
             console.log(check)
+            
             if(check.status){
                 state.map_string = stringify(Array.from(check.map.entries()));
+                toast.dismiss()
+                toast.success('Message was added!', toast_settings);
+            }else{
+                toast.dismiss()
+                toast.error(check.message, toast_settings)
             }
         },
         
         remove_directory: (state, action) => {
             let check = mapper.remove_directory(parse(current(state.map)), action.payload.directory);
             if(check.status){
+                toast.dismiss()
+                toast.success('Directory was removed!', toast_settings);
                 state.map_string = stringify(Array.from(check.map.entries()));
+            }else{
+                toast.dismiss()
+                toast.error(check.message, toast_settings)
             }
         },
         
@@ -39,7 +66,12 @@ const slice = createSlice({
             let map_to_use = new Map(parse(state.map_string))
             let check = mapper.remove_message(map_to_use, action.payload.message);
             if(check.status){
+                toast.dismiss()
+                toast.success('Message was removed!', toast_settings);
                 state.map_string = stringify(Array.from(check.map.entries()));
+            }else{
+                toast.dismiss()
+                toast.error(check.message, toast_settings)
             }
         },
         
@@ -47,7 +79,12 @@ const slice = createSlice({
             let map_to_use = new Map(parse(state.map_string))
             let check = mapper.modify_directory(parse(current(state.map)), action.payload.directory, action.payload.name);
             if(check.status){
+                toast.dismiss()
+                toast.success('Directory changes saved!', toast_settings);
                 state.map_string = stringify(Array.from(check.map.entries()));
+            }else{
+                toast.dismiss()
+                toast.error(check.message, toast_settings)
             }
         },
         
@@ -55,7 +92,12 @@ const slice = createSlice({
             let map_to_use = new Map(parse(state.map_string))
             let check = mapper.modify_message(map_to_use, action.payload.message, action.payload.raw_message, action.payload.comserver, action.payload.scripts, action.payload.description);
             if(check.status){
+                toast.dismiss()
+                toast.success('Message changes saved!', toast_settings);
                 state.map_string = stringify(Array.from(check.map.entries()));
+            }else{
+                toast.dismiss()
+                toast.error(check.message, toast_settings)
             }
         },
         
@@ -63,7 +105,12 @@ const slice = createSlice({
             let map_to_use = new Map(parse(state.map_string))
             let check = mapper.add_uids_to_everything(map_to_use);
             if(check.status){
+                toast.dismiss()
+                toast.warning('YOU SHOULD NOT BE USING THIS NAUGHTY!', toast_settings);
                 state.map_string = stringify(Array.from(check.map.entries()));
+            }else{
+                toast.dismiss()
+                toast.error(check.message, toast_settings)
             }
         },
     }
