@@ -17,7 +17,7 @@ export function Window({ current_directory }) {
   // @ts-ignore
   all_subs_and_messages.push(...current_directory.sub_directories)
   // @ts-ignore
-  all_subs_and_messages.push(...current_directory.messages)
+  all_subs_and_messages.push(...current_directory.messages.sort((a,b) => a.description.localeCompare(b.description)))
   // @ts-ignore
   all_subs_and_messages.push("final item")
   const rows = [...Array(Math.ceil((all_subs_and_messages.length + 1) / 6))]
@@ -34,18 +34,17 @@ export function Window({ current_directory }) {
           return (
             <div className="row" key={index} id={"row".concat(index.toString())}>
               {row.map((entry) => {
-                const key_value = hasher.hash(entry)
-                return entry == "final item"? <div className="col-xl-1 col-lg-2 col-md-3 col-sm-6 col-12" key={"FINAL ITEM"}>
-                <Add />
-              </div> :(( 
-                      // @ts-ignore
-                      entry.type === "message" ? <div className="col-xl-1 col-lg-2 col-md-3 col-sm-6 col-12" key={key_value}>
-                  <Message message={entry} />
-                </div>
-                  :
-                  <div className="col-xl-1 col-lg-2 col-md-3 col-sm-6 col-12" key={key_value}>
-                    <Folder folder={entry} />
-                  </div>))
+                return entry == "final item" ? <div className="col-xl-1 col-lg-2 col-md-3 col-sm-6 col-12" key={"FINAL ITEM"}>
+                  <Add />
+                </div> : ((
+                  // @ts-ignore
+                  entry.type === "message" ? <div className="col-xl-1 col-lg-2 col-md-3 col-sm-6 col-12" key={entry.id}>
+                    <Message message={entry} />
+                  </div>
+                    :
+                    <div className="col-xl-1 col-lg-2 col-md-3 col-sm-6 col-12" key={entry.id}>
+                      <Folder folder={entry} />
+                    </div>))
               })
               }
             </div>
