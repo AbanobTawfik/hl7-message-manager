@@ -2,7 +2,7 @@
 import global_variables from '../globals/global_variables.ts'
 import directory from '../types/directory'
 import { stringify, parse } from 'circular-json'
-
+import * as mapper from '../services/dictionary.ts'
 let database_object: Map<number, directory>
 
 // only used on start up
@@ -10,10 +10,12 @@ export function read_file(): Map<number, directory> {
   // if file doesnt exist we will create it
   // @ts-ignore
   let data: string = window.localStorage.getItem(global_variables.dictionary_name)
-  if (data == null) {
+  if (data == null || data ==="" || data === "[]") {
     let write_object: any = new Map<number, directory>()
-
-    window.localStorage.setItem(global_variables.dictionary_name, stringify(Array.from(write_object)))
+    let check = mapper.create_root(write_object)
+    console.log(check.map)
+    window.localStorage.setItem(global_variables.dictionary_name, stringify(Array.from(check.map)))
+    window.localStorage.setItem(global_variables.current_directory, "root")
     return write_object
   }
 

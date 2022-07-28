@@ -37,8 +37,7 @@ const slice = createSlice({
 
         add_message: (state, action) => {
             let map_to_use = new Map(parse(state.map_string))
-            let check = mapper.add_message(map_to_use, action.payload.directory_path, action.payload.comserver, action.scripts, action.payload.description, action.payload.raw_message)
-            console.log(check)
+            let check = mapper.add_message(map_to_use, action.payload.directory_path, action.payload.comserver, action.payload.scripts, action.payload.description, action.payload.raw_message)
             
             if(check.status){
                 state.map_string = stringify(Array.from(check.map.entries()));
@@ -51,7 +50,8 @@ const slice = createSlice({
         },
         
         remove_directory: (state, action) => {
-            let check = mapper.remove_directory(parse(current(state.map)), action.payload.directory);
+            let map_to_use = new Map(parse(state.map_string))
+            let check = mapper.remove_directory(map_to_use, action.payload.directory_string);
             if(check.status){
                 toast.dismiss()
                 toast.success('Directory was removed!', toast_settings);
@@ -77,7 +77,8 @@ const slice = createSlice({
         
         modify_directory: (state, action) => {
             let map_to_use = new Map(parse(state.map_string))
-            let check = mapper.modify_directory(parse(current(state.map)), action.payload.directory, action.payload.name);
+            console.log(action.payload)
+            let check = mapper.modify_directory(map_to_use, action.payload.directory_string, action.payload.name);
             if(check.status){
                 toast.dismiss()
                 toast.success('Directory changes saved!', toast_settings);

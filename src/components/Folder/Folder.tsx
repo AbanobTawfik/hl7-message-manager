@@ -14,10 +14,28 @@ import { remove_directory, modify_directory} from '../../state/slices/map_slice.
 export function Folder({ folder }) {
   const [is_open, toggle_modal] = useState(false);
   const [is_saveable, toggle_save] = useState(false);
-
   const dispatch = useDispatch();
   const dir_name = mapper.get_path_from_root(folder)
   const modify_directory_name = React.createRef()
+
+  const modify_directory_dispatch = () => {
+    const remove_directory_payload = {
+      directory_path: folder.name,
+      directory_string: dir_name,
+      name: modify_directory_name.current.value
+    }
+    dispatch(remove_directory(remove_directory_payload))
+  };
+  
+  const remove_directory_dispatch = () => {
+    if (is_saveable) {
+      const remove_directory_payload = {
+        directory_string: dir_name,
+      }
+      console.log(remove_directory_payload)
+      dispatch(remove_directory(remove_directory_payload))
+    }
+  };
 
   const { show } = useContextMenu({
     id: dir_name,
@@ -53,7 +71,7 @@ export function Folder({ folder }) {
             </Row>
             <hr />
             <Row style={{ fontSize: "0.98rem" }}>
-              <Col xs={12} md={6} lg={2} xl={10} sm={6} style={{ cursor: is_saveable ? 'pointer' : 'not-allowed' }} onClick={() => {console.log("HELLO WORLD")}}>
+              <Col xs={12} md={6} lg={2} xl={10} sm={6} style={{ cursor: is_saveable ? 'pointer' : 'not-allowed' }} onClick={modify_directory_dispatch}>
                 Save
                 <br />
                 <FaSave style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
@@ -84,7 +102,7 @@ export function Folder({ folder }) {
     {!is_open && <Menu id={dir_name}>
       <Item onClick={() => { toggle_modal(true) }}>Rename </Item>
 
-      <Item onClick={() => { toggle_modal(true) }}>Remove </Item>
+      <Item onClick={() => {remove_directory_dispatch()}}>Remove </Item>
     </Menu>
     }
 

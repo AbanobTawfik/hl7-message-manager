@@ -51,7 +51,6 @@ export function Add() {
         array_scripts = array_scripts.map(element => {
           return element.trim();
         });
-
         const add_message_payload = {
           directory_path: current_directory_path.path,
           // @ts-ignore
