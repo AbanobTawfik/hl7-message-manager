@@ -28,12 +28,10 @@ export function Folder({ folder }) {
   };
   
   const remove_directory_dispatch = () => {
-    if (is_saveable) {
       const remove_directory_payload = {
         directory_string: dir_name,
       }
       dispatch(remove_directory(remove_directory_payload))
-    }
   };
 
   const { show } = useContextMenu({
@@ -101,7 +99,7 @@ export function Folder({ folder }) {
     {!is_open && <Menu id={dir_name}>
       <Item onClick={() => { toggle_modal(true) }}>Rename </Item>
 
-      <Item onClick={() => {remove_directory_dispatch()}}>Remove </Item>
+      <Item onClick={remove_directory_dispatch}>Remove </Item>
     </Menu>
     }
 
