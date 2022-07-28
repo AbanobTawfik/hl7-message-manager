@@ -77,8 +77,10 @@ const slice = createSlice({
         
         modify_directory: (state, action) => {
             let map_to_use = new Map(parse(state.map_string))
+            console.log("BEFORE",map_to_use)
             console.log(action.payload)
             let check = mapper.modify_directory(map_to_use, action.payload.directory_string, action.payload.name);
+            console.log("AFTER",check.map)
             if(check.status){
                 toast.dismiss()
                 toast.success('Directory changes saved!', toast_settings);
