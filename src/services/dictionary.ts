@@ -127,19 +127,36 @@ export function add_message(
 // modifying
 export function remove_directory(dictionary: Map<number, directory>, directory_string: string): return_status {
     let directory: directory = get_directory_by_name(dictionary, directory_string)
+    let parent: directory = get_directory_by_name(dictionary, get_parent_path_from_root(directory))
     let hash_value_directory: number = hasher.hash(directory)
     if (!dictionary.has(hash_value_directory)) {
         return { map: dictionary, status: false, message: "directory doesn't exist!" }
     }
-    let directory_copy = parse(stringify(directory))
-    let directory_index: number = directory_copy.sub_directories.indexOf(directory_copy)
-    directory_copy.messages = null
-    // remove it from parent directory
-    directory_copy.parent_directory.sub_directories.splice(directory_index, 1)
-    // remove it from all sub directories as parent
-    directory_copy.sub_directories.forEach(d => d.parent_directory = null)
-    directory_copy.sub_directories = null
-    dictionary.delete(hash_value_directory)
+    // deletion needs to occur downstream so first find out all directories to delete and remove from map
+    let search_queue = [get_path_from_root(directory)]
+    let visited = new Map<string, boolean>()
+    while (search_queue.length > 0) {
+        let curr_node = search_queue.pop();
+        let curr_node_dir = get_directory_by_name(dictionary, curr_node)
+        visited.set(curr_node, true)
+        for (let i = 0; i < curr_node_dir.sub_directories.length; i++) {
+            if (visited.has(curr_node_dir.sub_directories[i])) {
+                continue;
+            }
+            search_queue.push(curr_node_dir.sub_directories[i])
+        }
+        
+    }
+    // remove all directories we have visited
+    // remove from parents sub directories list
+    for(let [key, value] of visited){
+        let hash_key = hasher.hash(key)
+        dictionary.get(hash_key).messages = null
+        dictionary.delete(hash_key)
+    }
+    let directory_index: number = parent.sub_directories.indexOf(get_path_from_root(directory))
+    parent.sub_directories.splice(directory_index, 1)
+    dictionary.set(hasher.hash(parent), parent)
     write_file(dictionary)
     return { map: dictionary, status: true, message: 'directory has been removed!' }
 }
@@ -223,7 +240,6 @@ export function modify_directory(
     dictionary.set(hash_value_parent, parent)
 
     // fix all subdirectories downstream from CURRENT directory
-    let current_subs = []
     let search_queue = [old_path]
     let visited = new Map<string, boolean>()
     while (search_queue.length > 0) {
