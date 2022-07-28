@@ -1,5 +1,5 @@
 // @ts-ignore
-import directory, { get_directory_name, get_path_from_root } from '../types/directory.ts'
+import directory, { get_directory_name, get_path_from_root, get_parent_path_from_root } from '../types/directory.ts'
 // @ts-ignore
 import message from '../types/message.ts'
 // @ts-ignore
@@ -9,13 +9,12 @@ import hasher from './hash.ts'
 // @ts-ignore
 import { write_file } from "../services/database.ts"
 import { stringify, parse } from 'circular-json'
-import {uid} from 'uid'
+import { uid } from 'uid'
 
 // passive
 export function get_directory_by_name(dictionary: Map<number, directory>, path: string): directory {
     // console.log("DICTDICTDICT", dictionary, "\n\n\n")
     let h: number = hasher.hash(path)
-    console.log(path.path, "dict", dictionary,"hash", h, "ret val", dictionary.get(h))
     return dictionary.get(h)
 }
 
@@ -74,7 +73,7 @@ export function add_directory(
     }
     // set the subdirectory of the parent to the new directory
     parent_directory.sub_directories.push(add)
-    
+
     dictionary = dictionary.set(hash_value, add)
     write_file(dictionary)
     return { map: dictionary, status: true, message: 'Success' }
@@ -90,7 +89,7 @@ export function add_message(
     raw_message: string
 ): return_status {
     // check if directory exists
-    let directory:directory = get_directory_by_name(dictionary, directory_path)
+    let directory: directory = get_directory_by_name(dictionary, directory_path)
     console.log("ret", directory)
     let hash_value_directory: number = hasher.hash(directory)
 
@@ -126,7 +125,8 @@ export function add_message(
 }
 
 // modifying
-export function remove_directory(dictionary: Map<number, directory>, directory: directory): return_status {
+export function remove_directory(dictionary: Map<number, directory>, directory_string: string): return_status {
+    let directory: directory = get_directory_by_name(dictionary, directory_path)
     let hash_value_directory: number = hasher.hash(directory)
     if (!dictionary.has(hash_value_directory)) {
         return { map: dictionary, status: false, message: "directory doesn't exist!" }
@@ -154,7 +154,7 @@ export function remove_message(
     if (!dictionary.has(hash_value_directory)) {
         return { map: dictionary, status: false, message: "directory doesn't exist!" }
     }
-    
+
     let new_messages = []
     let found = false;
     for (let i = 0; i < directory.messages.length; i++) {
@@ -178,7 +178,8 @@ export function remove_message(
     }
     // remove old unmodified message
     directory.messages = [...new_messages]
-    dictionary.set(hash_value_directory, directory) 
+    dictionary.set(hash_value_directory, directory)
+
     write_file(dictionary)
     return {
         map: dictionary,
@@ -190,22 +191,47 @@ export function remove_message(
 // modifying
 export function modify_directory(
     dictionary: Map<number, directory>,
-    directory: directory,
+    directory_path: string,
     name: string
 ): return_status {
-    let hash_value_directory: number = hasher.hash(directory)
+    console.log(directory_path)
+    let directory: directory = get_directory_by_name(dictionary, directory_path)
+    console.log(dictionary, directory_path)
+    let parent: directory = get_directory_by_name(dictionary, get_parent_path_from_root(directory))
+    let hash_value_directory: number = hasher.hash(directory);
     if (!dictionary.has(hash_value_directory)) {
-        return { map: dictionary, status: false, message: "directory doesn't exist!" }
+        return { map: dictionary, status: false, message: "Directory doesn't exist!" }
     }
-    let directory_copy: directory = parse(stringify(directory))
-    directory_copy.name = name
-    directory_copy.id = directory.id
-
+    let hash_value_parent: number = hasher.hash(parent);
+    let directory_copy: directory = parse(stringify(directory));
+    directory_copy.name = name;
+    directory_copy.id = directory.id;
+    directory_copy.parent = parent;
+    let new_value_hash: number = hasher.hash(directory_copy);
+    if (dictionary.has(hash_value_directory)) {
+        return { map: dictionary, status: false, message: "Name you are changing to already exists!" }
+    }
     // delete them since the hash will change!!!
-    dictionary.delete(hash_value_directory)
+    dictionary.delete(hash_value_directory);
     // compute new hash
-    hash_value_directory = hasher.hash(directory_copy)
-    dictionary.set(hash_value_directory, directory_copy)
+    hash_value_directory = hasher.hash(directory_copy);
+
+    // add the new directory as a child of the parent
+
+    let new_subs: directory[] = []
+    for (let i = 0; i < parent.sub_directories.length; i++) {
+        if (!dictionary.has(hasher.hash(parent.sub_directories[i])) || hasher.hash(parent.sub_directories[i]) === hash_value_directory) {
+            continue;
+        }
+        new_subs.push(parent.sub_directories[i])
+    }
+    new_subs.push(directory_copy);
+    parent.sub_directories = new_subs
+    console.log(new_subs)
+    dictionary.set(hash_value_parent, parent);
+    dictionary.set(hash_value_directory, directory_copy);
+
+
     write_file(dictionary)
     return { map: dictionary, status: true, message: 'changed name successfully!' }
 }
@@ -257,7 +283,7 @@ export function modify_message(
         description == null ? message.description : description
     message_copy.id = message.id
     directory.messages.push(message_copy)
-    dictionary.set(hash_value_directory, directory) 
+    dictionary.set(hash_value_directory, directory)
     write_file(dictionary)
     return { map: dictionary, status: true, message: 'message has been modified!' }
 }
@@ -281,12 +307,12 @@ export function get_all_directories_from_current(dictionary: Map<number, directo
 }
 
 // add uids only need to ever do this once and now
-export function add_uids_to_everything(dictionary: Map<number, directory>){
-    for(let [key, value] of dictionary){
-        let entry_copy:directory = parse(stringify(value))
+export function add_uids_to_everything(dictionary: Map<number, directory>) {
+    for (let [key, value] of dictionary) {
+        let entry_copy: directory = parse(stringify(value))
         entry_copy.id = uid(32)
-        
-        for(let i = 0; i < entry_copy.messages.length; i++){
+
+        for (let i = 0; i < entry_copy.messages.length; i++) {
             entry_copy.messages[i].id = uid(32)
         }
         dictionary.set(key, entry_copy)
@@ -295,3 +321,4 @@ export function add_uids_to_everything(dictionary: Map<number, directory>){
     write_file(dictionary)
     return { map: dictionary, status: true, message: 'message has been modified!' }
 }
+
