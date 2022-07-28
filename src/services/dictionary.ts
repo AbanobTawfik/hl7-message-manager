@@ -13,7 +13,6 @@ import { uid } from 'uid'
 
 // passive
 export function get_directory_by_name(dictionary: Map<number, directory>, path: string): directory {
-    // console.log("DICTDICTDICT", dictionary, "\n\n\n")
     let h: number = hasher.hash(path)
     return dictionary.get(h)
 }
@@ -35,7 +34,7 @@ export function get_all_directory_names(dictionary: Map<number, directory>): str
 // modifiying
 export function create_root(dictionary: Map<number, directory>): return_status {
     let root: directory = {
-        parent_directory: null,
+        parent_directory: "",
         sub_directories: [],
         name: "root",
         messages: [],
@@ -59,7 +58,7 @@ export function add_directory(
 ): return_status {
     let parent_directory = get_directory_by_name(dictionary, parent_directory_path)
     let add: directory = {
-        parent_directory: parent_directory,
+        parent_directory: parent_directory_path,
         sub_directories: [],
         name: name,
         messages: [],
@@ -72,9 +71,10 @@ export function add_directory(
         return { map: dictionary, status: false, message: 'Directory path already exists' }
     }
     // set the subdirectory of the parent to the new directory
-    parent_directory.sub_directories.push(add)
-
+    parent_directory.sub_directories.push(get_path_from_root(add))
     dictionary = dictionary.set(hash_value, add)
+    // update parent too
+    dictionary = dictionary.set(hasher.hash(parent_directory), parent_directory)
     write_file(dictionary)
     return { map: dictionary, status: true, message: 'Success' }
 }
@@ -90,7 +90,7 @@ export function add_message(
 ): return_status {
     // check if directory exists
     let directory: directory = get_directory_by_name(dictionary, directory_path)
-    console.log("ret", directory)
+
     let hash_value_directory: number = hasher.hash(directory)
 
     if (!dictionary.has(hash_value_directory)) {
@@ -113,7 +113,7 @@ export function add_message(
         id: uid(36)
     }
     // check if this message exists in this instance of the map
-    console.log(directory_copy.messages.filter(m => m.raw_message === message_to_add.raw_message).length)
+
     if (directory_copy.messages.filter(m => m.description === message_to_add.description).length > 0) {
         return { map: dictionary, status: false, message: 'value already exists in this directory!' }
     }
@@ -126,7 +126,7 @@ export function add_message(
 
 // modifying
 export function remove_directory(dictionary: Map<number, directory>, directory_string: string): return_status {
-    let directory: directory = get_directory_by_name(dictionary, directory_path)
+    let directory: directory = get_directory_by_name(dictionary, directory_string)
     let hash_value_directory: number = hasher.hash(directory)
     if (!dictionary.has(hash_value_directory)) {
         return { map: dictionary, status: false, message: "directory doesn't exist!" }
@@ -194,30 +194,21 @@ export function modify_directory(
     directory_path: string,
     name: string
 ): return_status {
-    console.log(directory_path)
     let directory: directory = get_directory_by_name(dictionary, directory_path)
-    console.log(dictionary, directory_path)
     let parent: directory = get_directory_by_name(dictionary, get_parent_path_from_root(directory))
+    const old_path = get_path_from_root(directory)
     let hash_value_directory: number = hasher.hash(directory);
     if (!dictionary.has(hash_value_directory)) {
         return { map: dictionary, status: false, message: "Directory doesn't exist!" }
     }
     let hash_value_parent: number = hasher.hash(parent);
-    let directory_copy: directory = parse(stringify(directory));
-    directory_copy.name = name;
-    directory_copy.id = directory.id;
-    directory_copy.parent = parent;
-    let new_value_hash: number = hasher.hash(directory_copy);
-    if (dictionary.has(hash_value_directory)) {
+    directory.name = name;
+    let new_value_hash: number = hasher.hash(directory);
+    const new_path = get_path_from_root(directory);
+    if (dictionary.has(new_value_hash)) {
         return { map: dictionary, status: false, message: "Name you are changing to already exists!" }
     }
-    // delete them since the hash will change!!!
-    dictionary.delete(hash_value_directory);
-    // compute new hash
-    hash_value_directory = hasher.hash(directory_copy);
-
-    // add the new directory as a child of the parent
-
+    // since we are modifying (all dirs have only 1 parent we want to update the parents sub_directory list)
     let new_subs: directory[] = []
     for (let i = 0; i < parent.sub_directories.length; i++) {
         if (!dictionary.has(hasher.hash(parent.sub_directories[i])) || hasher.hash(parent.sub_directories[i]) === hash_value_directory) {
@@ -225,11 +216,44 @@ export function modify_directory(
         }
         new_subs.push(parent.sub_directories[i])
     }
-    new_subs.push(directory_copy);
+
+    new_subs.push(get_path_from_root(directory));
+
     parent.sub_directories = new_subs
-    console.log(new_subs)
-    dictionary.set(hash_value_parent, parent);
-    dictionary.set(hash_value_directory, directory_copy);
+    dictionary.set(hash_value_parent, parent)
+
+    // fix all subdirectories downstream from CURRENT directory
+    let current_subs = []
+    let search_queue = [old_path]
+    let visited = new Map<string, boolean>()
+    while (search_queue.length > 0) {
+        let curr_node = search_queue.pop();
+        let curr_node_dir = get_directory_by_name(dictionary, curr_node)
+        let curr_node_dir_hash = hasher.hash(curr_node_dir)
+        curr_node_dir.parent_directory = curr_node_dir.parent_directory.replace(old_path, new_path)
+        // fix the messages path
+        for(let i = 0; i < curr_node_dir.messages.length; i++){
+            curr_node_dir.messages[i].directory_path = curr_node_dir.messages[i].directory_path.replace(old_path, new_path)
+        }
+        visited.set(curr_node, true)
+        for (let i = 0; i < curr_node_dir.sub_directories.length; i++) {
+            if (visited.has(curr_node_dir.sub_directories[i])) {
+                continue;
+            }
+            search_queue.push(curr_node_dir.sub_directories[i])
+        }
+        // fix subs
+        for(let i = 0; i < curr_node_dir.sub_directories.length; i++){
+            curr_node_dir.sub_directories[i] = curr_node_dir.sub_directories[i].replace(old_path, new_path)
+            console.log("old path:", old_path, "new path: ", new_path, "replace", curr_node_dir.sub_directories[i].replace(old_path, new_path), "instead", curr_node_dir.sub_directories[i])
+        }
+        // recompute hash for the curr_node_dir since its changed parent
+        dictionary.delete(curr_node_dir_hash)
+        dictionary.set(hasher.hash(curr_node_dir), curr_node_dir)
+    }
+
+    dictionary.delete(hash_value_directory)
+    dictionary.set(new_value_hash, directory);
 
 
     write_file(dictionary)
@@ -303,7 +327,12 @@ export function get_all_directories_from_current(dictionary: Map<number, directo
     if (!dictionary.has(hash_value_directory)) {
         return [];
     }
-    return dictionary.get(hash_value_directory).sub_directories;
+    let all_dirs_from_current: directory[] = [];
+    let subs = dictionary.get(hash_value_directory).sub_directories
+    for (let i = 0; i < subs.length; i++) {
+        all_dirs_from_current.push(get_directory_by_name(dictionary, subs[i]));
+    }
+    return all_dirs_from_current;
 }
 
 // add uids only need to ever do this once and now
@@ -317,7 +346,7 @@ export function add_uids_to_everything(dictionary: Map<number, directory>) {
         }
         dictionary.set(key, entry_copy)
     }
-    console.log(dictionary)
+
     write_file(dictionary)
     return { map: dictionary, status: true, message: 'message has been modified!' }
 }

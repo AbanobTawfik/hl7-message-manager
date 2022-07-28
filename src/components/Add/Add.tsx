@@ -89,12 +89,10 @@ export function Add() {
     }
   }
 
-  console.log(is_open)
-
   return (
     <div className={styles.Add} style={{ cursor: 'pointer' }} data-testid="Add">
-      <img className="img-fluid .resize" style={{maxHeight:"100px", maxWidth:"100px"}} src={add_icon} onClick={() => { toggle_modal(true) }} />
-      <br/>
+      <img className="img-fluid .resize" style={{ maxHeight: "100px", maxWidth: "100px" }} src={add_icon} onClick={() => { toggle_modal(true) }} />
+      <br />
       Add
       {<Modal
         show={is_open}
@@ -203,7 +201,6 @@ export function Add() {
                   defaultValue={form_data.directory_name}
                   onChange={() => {
                     form_data.directory_name = add_directory_name.current.value;
-                    console.log(form_data)
                     toggle_save(!adding_file && add_directory_name.current.value != "")
                   }}
                 />

@@ -20,7 +20,6 @@ export function Back() {
 
     dir_name = directory.get_parent_path_from_root(current_directory)
   }
-  console.log(dir_name)
   return (<div className={styles.Back} data-testid="Back" style={{ cursor: 'pointer' }} onClick={() => { dispatch(change_current_directory(dir_name)) }}>
     <FaBackward />
   </div>)

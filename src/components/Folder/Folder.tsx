@@ -24,7 +24,7 @@ export function Folder({ folder }) {
       directory_string: dir_name,
       name: modify_directory_name.current.value
     }
-    dispatch(remove_directory(remove_directory_payload))
+    dispatch(modify_directory(remove_directory_payload))
   };
   
   const remove_directory_dispatch = () => {
@@ -32,7 +32,6 @@ export function Folder({ folder }) {
       const remove_directory_payload = {
         directory_string: dir_name,
       }
-      console.log(remove_directory_payload)
       dispatch(remove_directory(remove_directory_payload))
     }
   };
