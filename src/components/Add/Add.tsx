@@ -14,7 +14,8 @@ let form_data = {
   scripts: "",
   description: "",
   raw_data: "",
-  directory_name: ""
+  directory_name: "",
+  notes: ""
 }
 
 export function Add() {
@@ -27,6 +28,7 @@ export function Add() {
   const add_scripts = React.createRef()
   const add_data = React.createRef()
   const add_directory_name = React.createRef()
+  const add_notes = React.createRef()
   const modal_ref = React.createRef()
   const dispatch = useDispatch();
   const global_state = useSelector((state) => state);
@@ -62,6 +64,7 @@ export function Add() {
           scripts: array_scripts,
           // @ts-ignore
           description: add_description.current.value,
+          notes: add_notes.current.value
         }
         dispatch(add_message(add_message_payload))
         // clear inputs
@@ -73,6 +76,7 @@ export function Add() {
         form_data.scripts = ""
         form_data.raw_data = ""
         form_data.interface = ""
+        form_data.notes = ""
         toggle_save(false)
       } else {
         const add_directory_payload = {
@@ -222,6 +226,23 @@ export function Add() {
                     form_data.scripts = add_scripts.current.value;
                     add_scripts.current.style.height = "0px"
                     add_scripts.current.style.height = add_scripts.current.scrollHeight + "px"
+                  }}
+                  onKeyDown={(e) => { handleTextAreaInput(e, add_scripts) }}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
+                <Form.Label style={{ fontWeight: 800 }}>Notes</Form.Label>
+                <Form.Control as="textarea"
+                  // @ts-ignore
+                  ref={add_notes}
+                  defaultValue={form_data.scripts}
+                  style={{ minHeight: "5rem", overflow: 'hidden', fontWeight: 300 }}
+                  onFocus={() => toggle_focus(true)}
+                  onBlur={() => toggle_focus(false)}
+                  onChange={() => {
+                    form_data.scripts = add_notes.current.value;
+                    add_notes.current.style.height = "0px"
+                    add_notes.current.style.height = add_notes.current.scrollHeight + "px"
                   }}
                   onKeyDown={(e) => { handleTextAreaInput(e, add_scripts) }}
                 />
