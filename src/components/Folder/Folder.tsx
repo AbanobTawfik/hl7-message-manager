@@ -61,6 +61,11 @@ export function Folder ({ folder }) {
       ref.current.blur()
       modal_ref.current.focus()
     }
+    if (e.key === 'Enter') {
+      if (is_saveable) {
+        modify_directory_dispatch()
+      }
+    }
   }
 
   return (
@@ -75,7 +80,7 @@ export function Folder ({ folder }) {
           console.log('HI')
           if (e.key === 'Enter') {
             if (is_saveable) {
-              modify_message_dispatch()
+              modify_directory_dispatch()
             }
           }
         }
