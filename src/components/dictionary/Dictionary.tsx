@@ -2,13 +2,13 @@ import React, { FC, useState, useMemo } from 'react';
 // @ts-ignore
 import styles from './Dictionary.module.scss';
 // @ts-ignore
-import Folder from '../Folder/Folder.tsx'
+import Folder from '../Folder/Folder'
 // @ts-ignore
-import * as dba from "../../services/database.ts"
+import * as dba from "../../services/database"
 // @ts-ignore
-import * as mapper from "../../services/dictionary.ts"
+import * as mapper from "../../services/dictionary"
 // @ts-ignore
-import Window from "../Window/Window.tsx"
+import Window from "../Window/Window"
 import {useSelector, useDispatch} from 'react-redux'
 import {change_current_directory} from '../../state/slices/current_directory_slice.js'
 import { stringify, parse } from 'circular-json'

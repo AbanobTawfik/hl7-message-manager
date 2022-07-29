@@ -1,4 +1,3 @@
-import { rootCertificates } from 'tls'
 import message from './message'
 
 type directory = {
@@ -12,24 +11,24 @@ type directory = {
 
 export default directory
 
-export function get_path_from_root(directory: directory): string {
-  if (directory.name === "root") {
-    return "root"
+export function get_path_from_root (directory: directory): string {
+  if (directory.name === 'root') {
+    return 'root'
   }
-  return directory.parent_directory + "/" + directory.name;
+  return directory.parent_directory + '/' + directory.name
 }
 
-export function get_parent_path_from_root(directory: directory): string {
-  if (directory.name === "root") {
-    return "root"
+export function get_parent_path_from_root (directory: directory): string {
+  if (directory.name === 'root') {
+    return 'root'
   }
   return directory.parent_directory
 }
 
-export function get_messages(directory: directory): message[] {
+export function get_messages (directory: directory): message[] {
   return directory.messages
 }
 
-export function get_directory_name(directory: directory): string {
+export function get_directory_name (directory: directory): string {
   return directory.name
 }

@@ -1,10 +1,10 @@
 import React, { FC, useState, useCallback } from 'react';
 import styles from './Folder.module.scss';
 import folder_icon from '../../resources/Icons/folder.png'
-import directory from '../../types/directory.ts'
+import directory from '../../types/directory'
 import { useSelector, useDispatch } from 'react-redux'
 import { change_current_directory } from '../../state/slices/current_directory_slice.js'
-import * as mapper from "../../types/directory.ts"
+import * as mapper from "../../types/directory"
 import { Menu, Item, Separator, Submenu, useContextMenu } from 'react-contexify';
 import { Modal, Button, Row, Container, Col, Form } from 'react-bootstrap';
 import { FaSave } from 'react-icons/fa'

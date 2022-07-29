@@ -1,0 +1,13 @@
+{
+    "include": [
+        "src/*"
+    ],
+    "compilerOptions": {
+        "target": "es5",
+        "jsx": "react",
+        "allowSyntheticDefaultImports": true
+    },
+    "resolve": {
+        "extensions": [".ts", ".tsx", ".js"]
+    }
+}
