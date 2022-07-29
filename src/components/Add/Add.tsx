@@ -21,11 +21,13 @@ export function Add() {
   const [is_open, toggle_modal] = useState(false);
   const [is_saveable, toggle_save] = useState(false);
   const [adding_file, toggle_adding_file] = useState(true);
+  const [has_focus, toggle_focus] = useState(false);
   const add_interface = React.createRef()
   const add_description = React.createRef()
   const add_scripts = React.createRef()
   const add_data = React.createRef()
   const add_directory_name = React.createRef()
+  const modal_ref = React.createRef()
   const dispatch = useDispatch();
   const global_state = useSelector((state) => state);
   // @ts-ignore
@@ -88,9 +90,53 @@ export function Add() {
       }
     }
   }
+  const handleTextAreaInput = (e, ref) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      let start = ref.current.selectionStart;
+      var end = ref.current.selectionEnd;
+      ref.current.value = ref.current.value.substring(0, start) + "    " + ref.current.value.substring(end);
+      ref.current.selectionStart = start + 4;
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      ref.current.blur();
+      modal_ref.current.focus()
+    }
+  }
+  const handleInputInput = (e, ref) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      ref.current.blur();
+      modal_ref.current.focus()
+    }
+  }
 
   return (
-    <div className={styles.Add} style={{ cursor: 'pointer' }} data-testid="Add">
+    <div className={styles.Add} style={{ cursor: 'pointer' }} data-testid="Add"
+      onKeyDown={(e) => {
+        console.log("HI")
+        if (!has_focus && is_open) {
+          if (e.key === 'Enter') {
+            if (is_saveable) {
+              send_message_or_file()
+            }
+          }
+          if (e.key === 'd') {
+            if (adding_file) {
+              toggle_adding_file(false)
+              modal_ref.current.focus()
+
+            }
+          }
+          if (e.key === 'f') {
+            if (!adding_file) {
+              toggle_adding_file(true)
+              modal_ref.current.focus()
+            }
+          }
+        }
+      }}>
       <img className="img-fluid .resize" style={{ maxHeight: "100px", maxWidth: "100px" }} src={add_icon} onClick={() => { toggle_modal(true) }} />
       <br />
       Add
@@ -98,9 +144,11 @@ export function Add() {
         show={is_open}
         // onAfterOpen={afterOpenModal}
         onHide={() => { toggle_modal(false); }}
+        tabIndex={-1}
         size="lg"
       >
-        <Form>
+        <Form tabIndex={1} ref={modal_ref}>
+
           <Modal.Header closeButton className="show-grid">
 
             <Container className={styles.Add}>
@@ -121,7 +169,7 @@ export function Add() {
                   toggle_save(form_data.directory_name != "")
                   toggle_adding_file(false)
                 }}>
-                  Folder
+                  Directory
                   <br />
                   <FaFolderPlus style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
                 </Col>
@@ -142,8 +190,10 @@ export function Add() {
                   ref={add_description}
                   defaultValue={form_data.description}
                   style={{ fontWeight: 300, minHeight: "2.4rem" }}
+                  onFocus={() => toggle_focus(true)}
+                  onBlur={() => toggle_focus(false)}
                   onChange={() => { form_data.description = add_description.current.value; toggle_save(adding_file && add_description.current.value != "") }}
-                // onChange={toggle_save(adding_file && add_description.current.value != "")}
+                  onKeyDown={(e) => { handleInputInput(e, add_description) }}
                 />
               </Form.Group>
               <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -153,7 +203,10 @@ export function Add() {
                   ref={add_interface}
                   defaultValue={form_data.interface}
                   style={{ fontWeight: 300, minHeight: "2.4rem" }}
+                  onFocus={() => toggle_focus(true)}
+                  onBlur={() => toggle_focus(false)}
                   onChange={() => { form_data.interface = add_interface.current.value }}
+                  onKeyDown={(e) => { handleInputInput(e, add_interface) }}
                 />
               </Form.Group>
               <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
@@ -161,14 +214,16 @@ export function Add() {
                 <Form.Control as="textarea"
                   // @ts-ignore
                   ref={add_scripts}
-                  style={{ overflow: 'hidden' }}
                   defaultValue={form_data.scripts}
                   style={{ minHeight: "5rem", overflow: 'hidden', fontWeight: 300 }}
+                  onFocus={() => toggle_focus(true)}
+                  onBlur={() => toggle_focus(false)}
                   onChange={() => {
                     form_data.scripts = add_scripts.current.value;
                     add_scripts.current.style.height = "0px"
                     add_scripts.current.style.height = add_scripts.current.scrollHeight + "px"
                   }}
+                  onKeyDown={(e) => { handleTextAreaInput(e, add_scripts) }}
                 />
               </Form.Group>
               <Form.Group
@@ -181,11 +236,15 @@ export function Add() {
                   ref={add_data}
                   style={{ minHeight: "5rem", overflow: 'hidden', fontWeight: 300 }}
                   defaultValue={form_data.raw_data}
+                  onFocus={() => toggle_focus(true)}
+                  onBlur={() => toggle_focus(false)}
+                  autoComplete="off"
                   onChange={() => {
                     form_data.raw_data = add_data.current.value;
                     add_data.current.style.height = "0px"
                     add_data.current.style.height = add_data.current.scrollHeight + "px"
                   }}
+                  onKeyDown={(e) => { handleTextAreaInput(e, add_data) }}
                 />
               </Form.Group>
             </Container>
@@ -199,10 +258,14 @@ export function Add() {
                   // @ts-ignore
                   ref={add_directory_name}
                   defaultValue={form_data.directory_name}
+                  onFocus={() => toggle_focus(true)}
+                  onBlur={() => toggle_focus(false)}
+                  autoComplete="off"
                   onChange={() => {
                     form_data.directory_name = add_directory_name.current.value;
                     toggle_save(!adding_file && add_directory_name.current.value != "")
                   }}
+                  onKeyDown={(e) => { handleInputInput(e, add_directory_name) }}
                 />
               </Form.Group>
             </Container>

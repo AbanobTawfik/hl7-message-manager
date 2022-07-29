@@ -8,15 +8,17 @@ import * as mapper from "../../types/directory.ts"
 import { Menu, Item, Separator, Submenu, useContextMenu } from 'react-contexify';
 import { Modal, Button, Row, Container, Col, Form } from 'react-bootstrap';
 import { FaSave } from 'react-icons/fa'
-import { remove_directory, modify_directory} from '../../state/slices/map_slice.js'
+import { remove_directory, modify_directory } from '../../state/slices/map_slice.js'
 
 // folder component, takes in directory and shows just the name of the current directory 
 export function Folder({ folder }) {
   const [is_open, toggle_modal] = useState(false);
   const [is_saveable, toggle_save] = useState(false);
+  const [has_focus, toggle_focus] = useState(false);
   const dispatch = useDispatch();
   const dir_name = mapper.get_path_from_root(folder)
   const modify_directory_name = React.createRef()
+  const modal_ref = React.createRef()
 
   const modify_directory_dispatch = () => {
     const remove_directory_payload = {
@@ -26,12 +28,12 @@ export function Folder({ folder }) {
     }
     dispatch(modify_directory(remove_directory_payload))
   };
-  
+
   const remove_directory_dispatch = () => {
-      const remove_directory_payload = {
-        directory_string: dir_name,
-      }
-      dispatch(remove_directory(remove_directory_payload))
+    const remove_directory_payload = {
+      directory_string: dir_name,
+    }
+    dispatch(remove_directory(remove_directory_payload))
   };
 
   const { show } = useContextMenu({
@@ -44,9 +46,25 @@ export function Folder({ folder }) {
     event.preventDefault();
     show(event)
   }, [is_open, dir_name])
-  
 
-  return (<div className={styles.Folder} data-testid="Folder" style={{ cursor: 'pointer' }} onContextMenu={handleContextMenu}>
+  const handleInputInput = (e, ref) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      ref.current.blur();
+      modal_ref.current.focus()
+    }
+  }
+
+  return (<div className={styles.Folder} data-testid="Folder" style={{ cursor: 'pointer' }} onContextMenu={handleContextMenu} tabIndex={-1} onKeyDown={(e) => {
+    if (!has_focus && is_open) {
+      console.log("HI")
+      if (e.key === 'Enter') {
+        if (is_saveable) {
+          modify_message_dispatch()
+        }
+      }
+    }
+  }}>
 
     <div>
       <img className="img-fluid" style={{ maxHeight: "100px", maxWidth: "100px" }} onClick={() => { dispatch(change_current_directory(dir_name)) }} src={folder_icon} />
@@ -59,7 +77,7 @@ export function Folder({ folder }) {
       onHide={() => { toggle_modal(false); }}
       size="lg"
     >
-      <Form>
+      <Form tabIndex={1}   ref={modal_ref}>
         <Modal.Header closeButton className="show-grid">
 
           <Container className={styles.Add}>
@@ -86,9 +104,13 @@ export function Folder({ folder }) {
                 ref={modify_directory_name}
                 defaultValue={folder.name}
                 onChange={() => {
-                // @ts-ignore
-                  toggle_save( modify_directory_name.current.value != folder.name && modify_directory_name.current.value != "")
+                  // @ts-ignore
+                  toggle_save(modify_directory_name.current.value != folder.name && modify_directory_name.current.value != "")
                 }}
+                onFocus={() => toggle_focus(true)}
+                onBlur={() => toggle_focus(false)}
+                onKeyDown={(e) => { handleInputInput(e, modify_directory_name) }}
+
               />
             </Form.Group>
           </Container>

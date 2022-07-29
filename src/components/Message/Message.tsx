@@ -30,8 +30,9 @@ export function Message({ message }) {
 
   const [is_open, toggle_modal] = useState(false);
   const [is_saveable, toggle_save] = useState(false);
-  console.log(is_open)
   const [is_editing, toggle_edit] = useState(false);
+  const [has_focus, toggle_focus] = useState(false);
+
   // @ts-ignore
   const dispatch = useDispatch();
 
@@ -48,6 +49,7 @@ export function Message({ message }) {
   const modify_scripts_ref = useHookWithRefCallBack(modify_scripts);
   const modify_data = React.createRef()
   const modify_data_ref = useHookWithRefCallBack(modify_data);
+  const modal_ref = React.createRef()
 
   const check_message_changes = () => {
     // @ts-ignore
@@ -101,6 +103,31 @@ export function Message({ message }) {
     toggle_edit(true)
   }
 
+  const handleTextAreaInput = (e, ref) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      let start = ref.current.selectionStart;
+      var end = ref.current.selectionEnd;
+
+      ref.current.value = ref.current.value.substring(0, start) + "    " + ref.current.value.substring(end);
+      ref.current.selectionStart = start + 4;
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      ref.current.blur();
+      modal_ref.current.focus()
+    }
+  }
+
+  const handleInputInput = (e, ref) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      ref.current.blur();
+      modal_ref.current.focus()
+    }
+  }
+
+
   const handleContextMenu = useCallback((event) => {
     if (is_open) {
       return
@@ -110,17 +137,41 @@ export function Message({ message }) {
   }, [is_open, message.id])
 
   return (
-    <div className={styles.Message} data-testid="Message" >
-      <img className="img-fluid" style={{cursor: 'pointer', maxHeight:"100px", maxWidth:"100px"}} onContextMenu={handleContextMenu} src={message_icon} onClick={() => { toggle_modal(true) }} />
-      <br/>
+    <div className={styles.Message} data-testid="Message" tabIndex={0}
+      onKeyDown={(e) => {
+        if (!has_focus && is_open) {
+          if (e.key === 'Enter') {
+            if (is_editing && is_saveable) {
+              modify_message_dispatch()
+            }
+          }
+          if (e.key === 'e') {
+            if (!is_editing) {
+              toggle_edit(true)
+              modal_ref.current.focus()
+
+            }
+          }
+          if (e.key === 'v') {
+            if (is_editing) {
+              toggle_edit(false)
+              modal_ref.current.focus()
+
+            }
+          }
+        }
+      }}>
+      <img className="img-fluid" style={{ cursor: 'pointer', maxHeight: "100px", maxWidth: "100px" }} onContextMenu={handleContextMenu} src={message_icon} onClick={() => { toggle_modal(true) }} />
+      <br />
       {message.description}
       {<Modal
         show={is_open}
         // onAfterOpen={afterOpenModal}
         onHide={() => { toggle_modal(false); }}
+        tabIndex={-1}
         size="lg"
       >
-        <Modal.Header closeButton className="show-grid">
+        <Modal.Header closeButton className="show-grid" tabIndex={1} ref={modal_ref}>
 
           <Container className={styles.Message}>
             <Row>
@@ -130,7 +181,7 @@ export function Message({ message }) {
             <Row style={{ fontSize: "0.98rem" }}>
               <Col xs={12} md={6} lg={2} xl={10} sm={6} style={{ cursor: 'pointer' }} onClick={() => {
                 navigator.clipboard.writeText(message.raw_message.replace(/(\r\n|\r)/gm, "\r"));
-                toast.dismiss(); 
+                toast.dismiss();
                 toast.success('Data Copied to Clipboard', {
                   position: "top-center",
                   autoClose: 2000,
@@ -148,7 +199,7 @@ export function Message({ message }) {
 
                 <FaCopy style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
               </Col>
-              <Col xs={12} md={6} lg={2} xl={10} sm={6} style={{ cursor: 'pointer' }} onClick={() => {toggle_edit(!is_editing) }}>
+              <Col xs={12} md={6} lg={2} xl={10} sm={6} style={{ cursor: 'pointer' }} onClick={() => { toggle_edit(!is_editing) }}>
                 {!is_editing && "Edit"}
                 {is_editing && "View"}
                 <br />
@@ -166,7 +217,7 @@ export function Message({ message }) {
           </Container>
         </Modal.Header>
         <Modal.Body>
-          {is_editing && <Form>
+          {is_editing && <Form >
             <Container>
 
               <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -175,8 +226,11 @@ export function Message({ message }) {
                   required
                   defaultValue={message.description}
                   ref={modify_description_ref}
-                  style={{ fontWeight: 300, minHeight:"2.4rem" }}
+                  style={{ fontWeight: 300, minHeight: "2.4rem" }}
+                  onFocus={() => toggle_focus(true)}
+                  onBlur={() => toggle_focus(false)}
                   onChange={() => { toggle_save(check_message_changes()) }}
+                  onKeyDown={(e) => { handleInputInput(e, modify_description) }}
                 />
               </Form.Group>
               <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -184,8 +238,11 @@ export function Message({ message }) {
                 <Form.Control
                   defaultValue={message.comserver}
                   ref={modify_interface_ref}
-                  style={{ fontWeight: 300, minHeight:"2.4rem" }}
+                  style={{ fontWeight: 300, minHeight: "2.4rem" }}
+                  onFocus={() => toggle_focus(true)}
+                  onBlur={() => toggle_focus(false)}
                   onChange={() => { toggle_save(check_message_changes()) }}
+                  onKeyDown={(e) => { handleInputInput(e, modify_interface) }}
                 />
               </Form.Group>
               <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
@@ -193,8 +250,11 @@ export function Message({ message }) {
                 <Form.Control as="textarea"
                   defaultValue={all_scripts_string}
                   ref={modify_scripts_ref}
+                  onFocus={() => toggle_focus(true)}
+                  onBlur={() => toggle_focus(false)}
                   style={{ minHeight: "5rem", overflow: 'hidden', fontWeight: 300 }}
                   onChange={() => { toggle_save(check_message_changes()); modify_scripts.current.style.height = "0px"; modify_scripts.current.style.height = modify_scripts.current.scrollHeight + "px" }}
+                  onKeyDown={(e) => { handleTextAreaInput(e, modify_scripts) }}
                 />
               </Form.Group>
               <Form.Group
@@ -206,13 +266,19 @@ export function Message({ message }) {
                   defaultValue={message.raw_message}
                   // @ts-ignore
                   ref={modify_data_ref}
+                  autoComplete="off"
                   style={{ minHeight: "5rem", overflow: 'hidden', fontWeight: 300 }}
-                  onChange={() => { toggle_save(check_message_changes()); modify_data.current.style.height = "0px";modify_data.current.style.height = modify_data.current.scrollHeight + "px" }}
+                  onFocus={() => toggle_focus(true)}
+                  onBlur={() => toggle_focus(false)}
+                  onChange={() => { toggle_save(check_message_changes()); modify_data.current.style.height = "0px"; modify_data.current.style.height = modify_data.current.scrollHeight + "px" }}
+                  onKeyDown={(e) => { handleTextAreaInput(e, modify_data) }}
                 />
               </Form.Group>
             </Container>
           </Form>}
-          {!is_editing && <div><Container >
+          {!is_editing && 
+          <div>
+          <Container>
             <Row style={{ fontWeight: 800 }}>
               Description
             </Row>
