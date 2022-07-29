@@ -37,7 +37,7 @@ const slice = createSlice({
 
         add_message: (state, action) => {
             let map_to_use = new Map(parse(state.map_string))
-            let check = mapper.add_message(map_to_use, action.payload.directory_path, action.payload.comserver, action.payload.scripts, action.payload.description, action.payload.raw_message)
+            let check = mapper.add_message(map_to_use, action.payload.directory_path, action.payload.comserver, action.payload.scripts, action.payload.description, action.payload.raw_message, action.payload.notes)
             
             if(check.status){
                 state.map_string = stringify(Array.from(check.map.entries()));
@@ -93,7 +93,8 @@ const slice = createSlice({
         
         modify_message: (state, action) => {
             let map_to_use = new Map(parse(state.map_string))
-            let check = mapper.modify_message(map_to_use, action.payload.message, action.payload.raw_message, action.payload.comserver, action.payload.scripts, action.payload.description);
+            console.log(action.payload)
+            let check = mapper.modify_message(map_to_use, action.payload.message, action.payload.raw_message, action.payload.comserver, action.payload.scripts, action.payload.description, action.payload.notes);
             if(check.status){
                 toast.dismiss()
                 toast.success('Message changes saved!', toast_settings);

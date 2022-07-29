@@ -8,7 +8,7 @@ import message_icon from '../../resources/Icons/message.png'
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Modal, Button, Row, Container, Col, Form } from 'react-bootstrap';
-import { FaCopy, FaEdit, FaSave, FaEye } from 'react-icons/fa'
+import { FaCopy, FaEdit, FaSave, FaEye, FaBookOpen } from 'react-icons/fa'
 import { useDispatch } from 'react-redux'
 import { modify_message, remove_message } from '../../state/slices/map_slice.js'
 import { Menu, Item, Separator, Submenu, useContextMenu } from 'react-contexify';
@@ -32,6 +32,7 @@ export function Message({ message }) {
   const [is_saveable, toggle_save] = useState(false);
   const [is_editing, toggle_edit] = useState(false);
   const [has_focus, toggle_focus] = useState(false);
+  const [view_notes, toggle_notes] = useState(false);
 
   // @ts-ignore
   const dispatch = useDispatch();
@@ -49,13 +50,15 @@ export function Message({ message }) {
   const modify_scripts_ref = useHookWithRefCallBack(modify_scripts);
   const modify_data = React.createRef()
   const modify_data_ref = useHookWithRefCallBack(modify_data);
+  const modify_notes = React.createRef()
+  const modify_notes_ref = useHookWithRefCallBack(modify_notes);
   const modal_ref = React.createRef()
 
   const check_message_changes = () => {
     // @ts-ignore
     return (modify_interface.current.value !== message.comserver || modify_description.current.value !== message.description
       // @ts-ignore
-      || modify_scripts.current.value !== all_scripts_string || modify_data.current.value !== message.raw_message) && modify_description.current.value !== ""
+      || modify_scripts.current.value !== all_scripts_string || modify_data.current.value !== message.raw_message || modify_notes.current.value !== message.notes) && modify_description.current.value !== ""
   }
 
   const modify_message_dispatch = () => {
@@ -82,8 +85,11 @@ export function Message({ message }) {
         comserver: modify_interface.current.value,
         scripts: array_scripts,
         // @ts-ignore
-        description: modify_description.current.value
+        description: modify_description.current.value,
+        // @ts-ignore
+        notes: modify_notes.current.value
       }
+      console.log(modify_message_payload)
       dispatch(modify_message(modify_message_payload))
       toggle_save(false)
       toggle_edit(false)
@@ -146,18 +152,20 @@ export function Message({ message }) {
             }
           }
           if (e.key === 'e') {
-            if (!is_editing) {
-              toggle_edit(true)
-              modal_ref.current.focus()
-
-            }
+            toggle_notes(false)
+            toggle_edit(true)
+            modal_ref.current.focus()
           }
           if (e.key === 'v') {
-            if (is_editing) {
-              toggle_edit(false)
-              modal_ref.current.focus()
+            toggle_edit(false)
+            toggle_notes(false)
+            modal_ref.current.focus()
 
-            }
+          }
+          if (e.key === 'n') {
+            toggle_edit(false)
+            toggle_notes(true)
+            modal_ref.current.focus()
           }
         }
       }}>
@@ -167,7 +175,7 @@ export function Message({ message }) {
       {<Modal
         show={is_open}
         // onAfterOpen={afterOpenModal}
-        onHide={() => { toggle_modal(false); }}
+        onHide={() => { toggle_modal(false); toggle_edit(false); toggle_focus(false); toggle_notes(false); toggle_save(false) }}
         tabIndex={-1}
         size="lg"
       >
@@ -175,49 +183,54 @@ export function Message({ message }) {
 
           <Container className={styles.Message}>
             <Row>
-              <Modal.Title>{!is_editing && "File View"} {is_editing && "File Edit"}</Modal.Title>
+              <Modal.Title>{(!is_editing && !view_notes) && "File View"} {(is_editing && !view_notes) && "File Edit"} {(!is_editing && view_notes) && message.description + " Notes"}</Modal.Title>
             </Row>
             <hr />
             <Row style={{ fontSize: "0.98rem" }}>
-              <Col xs={12} md={6} lg={2} xl={10} sm={6} style={{ cursor: 'pointer' }} onClick={() => {
-                navigator.clipboard.writeText(message.raw_message.replace(/(\r\n|\r)/gm, "\r"));
-                toast.dismiss();
-                toast.success('Data Copied to Clipboard', {
-                  position: "top-center",
-                  autoClose: 2000,
-                  hideProgressBar: false,
-                  closeOnClick: true,
-                  pauseOnHover: false,
-                  draggable: true,
-                  progress: undefined,
-                  theme: 'dark'
-                });
-              }}
-              >
+              <Col xs={12} md={6} lg={2} xl={10} sm={6}>
                 Copy
                 <br />
 
-                <FaCopy style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
+                <FaCopy style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: "2.5rem" }} onClick={() => {
+                  navigator.clipboard.writeText(message.raw_message.replace(/(\r\n|\r)/gm, "\r"));
+                  toast.dismiss();
+                  toast.success('Data Copied to Clipboard', {
+                    position: "top-center",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: true,
+                    progress: undefined,
+                    theme: 'dark'
+                  });
+                }} />
               </Col>
-              <Col xs={12} md={6} lg={2} xl={10} sm={6} style={{ cursor: 'pointer' }} onClick={() => { toggle_edit(!is_editing) }}>
+              <Col xs={12} md={6} lg={2} xl={10} sm={6}>
                 {!is_editing && "Edit"}
                 {is_editing && "View"}
                 <br />
-                {is_editing && <FaEye style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }} />}
-                {!is_editing && <FaEdit style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }} />}
+                {is_editing && <FaEye style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: "2.5rem" }} onClick={() => { toggle_notes(false); toggle_edit(!is_editing) }} />}
+                {!is_editing && <FaEdit style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: "2.5rem" }} onClick={() => { toggle_notes(false); toggle_edit(!is_editing) }} />}
 
 
               </Col>
-              <Col xs={12} md={6} lg={2} xl={10} sm={6} style={{ cursor: is_saveable ? 'pointer' : 'not-allowed' }} onClick={modify_message_dispatch}>
+              <Col xs={12} md={6} lg={2} xl={10} sm={6}>
+                Notes
+                <br />
+                <FaBookOpen style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: "2.5rem" }} onClick={() => { toggle_edit(false); toggle_notes(true) }} />
+              </Col>
+              <Col xs={12} md={6} lg={2} xl={10} sm={6}>
                 Save
                 <br />
-                <FaSave style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
+                <FaSave style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: "2.5rem", cursor: is_saveable ? 'pointer' : 'not-allowed' }} onClick={modify_message_dispatch} />
               </Col>
+
             </Row>
           </Container>
         </Modal.Header>
         <Modal.Body>
-          {is_editing && <Form >
+          {(is_editing && !view_notes) && <Form >
             <Container>
 
               <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -257,6 +270,18 @@ export function Message({ message }) {
                   onKeyDown={(e) => { handleTextAreaInput(e, modify_scripts) }}
                 />
               </Form.Group>
+              <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
+                <Form.Label style={{ fontWeight: 800 }}>Notes</Form.Label>
+                <Form.Control as="textarea"
+                  defaultValue={message.notes}
+                  ref={modify_notes_ref}
+                  onFocus={() => toggle_focus(true)}
+                  onBlur={() => toggle_focus(false)}
+                  style={{ minHeight: "5rem", overflow: 'hidden', fontWeight: 300 }}
+                  onChange={() => { toggle_save(check_message_changes()); modify_notes.current.style.height = "0px"; modify_notes.current.style.height = modify_notes.current.scrollHeight + "px" }}
+                  onKeyDown={(e) => { handleTextAreaInput(e, modify_notes) }}
+                />
+              </Form.Group>
               <Form.Group
                 className="mb-3"
                 controlId="exampleForm.ControlTextarea1"
@@ -276,38 +301,49 @@ export function Message({ message }) {
               </Form.Group>
             </Container>
           </Form>}
-          {!is_editing && 
-          <div>
-          <Container>
-            <Row style={{ fontWeight: 800 }}>
-              Description
-            </Row>
-            <Row style={{ fontWeight: 300 }}>
-              {message.description}
-            </Row>
-            <div className={styles.astrodivider}><div className={styles.astrodividermask}></div><span><i>&#10038;</i></span></div>
-            <Row style={{ fontWeight: 800 }}>
-              Interface
-            </Row>
-            <Row style={{ fontWeight: 300 }}>
-              {message.comserver}
-            </Row>
-            <div className={styles.astrodivider}><div className={styles.astrodividermask}></div><span><i>&#10038;</i></span></div>
-            <Row style={{ fontWeight: 800 }}>
-              Scripts
-            </Row>
-            <Row style={{ whiteSpace: "pre-line", fontWeight: 300 }}>
-              {all_scripts_string}
-            </Row>
-            <div className={styles.astrodivider}><div className={styles.astrodividermask}></div><span><i>&#10038;</i></span></div>
-            <Row style={{ fontWeight: 800 }}>
-              Data
-            </Row>
-            <Row style={{ whiteSpace: "pre-line", fontWeight: 300 }}>
-              {message.raw_message}
-            </Row>
-            <div className={styles.astrodivider}><div className={styles.astrodividermask}></div><span><i>&#10038;</i></span></div>
-          </Container></div>}
+          {(!is_editing && !view_notes) &&
+            <div>
+              <Container>
+                <Row style={{ fontWeight: 800 }}>
+                  Description
+                </Row>
+                <Row style={{ fontWeight: 300 }}>
+                  {message.description}
+                </Row>
+                <div className={styles.astrodivider}><div className={styles.astrodividermask}></div><span><i>&#10038;</i></span></div>
+                <Row style={{ fontWeight: 800 }}>
+                  Interface
+                </Row>
+                <Row style={{ fontWeight: 300 }}>
+                  {message.comserver}
+                </Row>
+                <div className={styles.astrodivider}><div className={styles.astrodividermask}></div><span><i>&#10038;</i></span></div>
+                <Row style={{ fontWeight: 800 }}>
+                  Scripts
+                </Row>
+                <Row style={{ whiteSpace: "pre-line", fontWeight: 300 }}>
+                  {all_scripts_string}
+                </Row>
+                <div className={styles.astrodivider}><div className={styles.astrodividermask}></div><span><i>&#10038;</i></span></div>
+                <Row style={{ fontWeight: 800 }}>
+                  Data
+                </Row>
+                <Row style={{ whiteSpace: "pre-line", fontWeight: 300 }}>
+                  {message.raw_message}
+                </Row>
+                <div className={styles.astrodivider}><div className={styles.astrodividermask}></div><span><i>&#10038;</i></span></div>
+              </Container></div>}
+          {(!is_editing && view_notes) &&
+            <div>
+              <Container>
+                <Row style={{ fontWeight: 800 }}>
+                  Your Notes
+                </Row>
+                <Row style={{ whiteSpace: "pre-line", fontWeight: 300 }}>
+                  {message.notes}
+                </Row>
+                <div className={styles.astrodivider}><div className={styles.astrodividermask}></div><span><i>&#10038;</i></span></div>
+              </Container></div>}
         </Modal.Body>
       </Modal>}
       {!is_open && <Menu id={message.id}>

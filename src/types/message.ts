@@ -5,6 +5,7 @@ type message = {
   description: string
   raw_message: string
   type: string
+  notes:string
   id: string
 }
 
