@@ -161,26 +161,26 @@ export function Add() {
               </Row>
               <hr />
               <Row style={{ fontSize: "0.98rem" }}>
-                <Col xs={12} md={6} lg={2} xl={10} sm={6} style={{ cursor: 'pointer' }} onClick={() => {
-                  toggle_save(form_data.description != "")
-                  toggle_adding_file(true)
-                }}>
+                <Col xs={12} md={6} lg={2} xl={4} sm={6}>
                   File
                   <br />
-                  <FaFileUpload style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
+                  <FaFileUpload style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', cursor: 'pointer' }} onClick={() => {
+                  toggle_save(form_data.description != "")
+                  toggle_adding_file(true)
+                }}/>
                 </Col>
-                <Col xs={12} md={6} lg={2} xl={10} sm={6} style={{ cursor: 'pointer' }} onClick={() => {
-                  toggle_save(form_data.directory_name != "")
-                  toggle_adding_file(false)
-                }}>
+                <Col xs={12} md={6} lg={2} xl={4} sm={6}>
                   Directory
                   <br />
-                  <FaFolderPlus style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
+                  <FaFolderPlus style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', cursor: 'pointer' }} onClick={() => {
+                  toggle_save(form_data.directory_name != "")
+                  toggle_adding_file(false)
+                }}/>
                 </Col>
-                <Col xs={12} md={6} lg={2} xl={10} sm={6} style={{ cursor: is_saveable ? 'pointer' : 'not-allowed' }} onClick={send_message_or_file}>
+                <Col xs={12} md={6} lg={2} xl={4} sm={6}>
                   Save
                   <br />
-                  <FaSave style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
+                  <FaSave style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', cursor: is_saveable ? 'pointer' : 'not-allowed' }} onClick={send_message_or_file}/>
                 </Col>
               </Row>
             </Container>

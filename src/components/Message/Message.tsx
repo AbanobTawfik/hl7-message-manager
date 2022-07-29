@@ -187,7 +187,7 @@ export function Message({ message }) {
             </Row>
             <hr />
             <Row style={{ fontSize: "0.98rem" }}>
-              <Col xs={12} md={6} lg={2} xl={10} sm={6}>
+              <Col xs={12} md={6} lg={2} xl={3} sm={6}>
                 Copy
                 <br />
 
@@ -206,7 +206,7 @@ export function Message({ message }) {
                   });
                 }} />
               </Col>
-              <Col xs={12} md={6} lg={2} xl={10} sm={6}>
+              <Col xs={12} md={6} lg={2} xl={3} sm={6}>
                 {!is_editing && "Edit"}
                 {is_editing && "View"}
                 <br />
@@ -215,12 +215,12 @@ export function Message({ message }) {
 
 
               </Col>
-              <Col xs={12} md={6} lg={2} xl={10} sm={6}>
+              <Col xs={12} md={6} lg={2} xl={3} sm={6}>
                 Notes
                 <br />
                 <FaBookOpen style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: "2.5rem" }} onClick={() => { toggle_edit(false); toggle_notes(true) }} />
               </Col>
-              <Col xs={12} md={6} lg={2} xl={10} sm={6}>
+              <Col xs={12} md={6} lg={2} xl={3} sm={6}>
                 Save
                 <br />
                 <FaSave style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: "2.5rem", cursor: is_saveable ? 'pointer' : 'not-allowed' }} onClick={modify_message_dispatch} />
