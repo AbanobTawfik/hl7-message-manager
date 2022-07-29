@@ -3,8 +3,8 @@ import styles from './Back.module.scss';
 import { FaBackward } from 'react-icons/fa'
 import { useSelector, useDispatch } from 'react-redux'
 import { change_current_directory } from '../../state/slices/current_directory_slice.js'
-import * as mapper from "../../services/dictionary.ts"
-import * as directory from "../../types/directory.ts"
+import * as mapper from "../../services/dictionary"
+import * as directory from "../../types/directory"
 import { stringify, parse } from 'circular-json'
 
 export function Back() {
