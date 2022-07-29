@@ -86,6 +86,7 @@ export function add_message(
     comserver: string = "",
     scripts: string[] = [],
     description: string = "",
+    notes: string = "",
     raw_message: string
 ): return_status {
     // check if directory exists
@@ -110,6 +111,7 @@ export function add_message(
         scripts: scripts,
         directory_path: path,
         type: 'message',
+        notes: notes,
         id: uid(36)
     }
     // check if this message exists in this instance of the map
@@ -261,7 +263,6 @@ export function modify_directory(
         // fix subs
         for(let i = 0; i < curr_node_dir.sub_directories.length; i++){
             curr_node_dir.sub_directories[i] = curr_node_dir.sub_directories[i].replace(old_path, new_path)
-            console.log("old path:", old_path, "new path: ", new_path, "replace", curr_node_dir.sub_directories[i].replace(old_path, new_path), "instead", curr_node_dir.sub_directories[i])
         }
         // recompute hash for the curr_node_dir since its changed parent
         dictionary.delete(curr_node_dir_hash)
@@ -283,7 +284,8 @@ export function modify_message(
     raw_message: string = "",
     comserver: string = "",
     scripts: string[] = [],
-    description: string = ""
+    description: string = "",
+    notes:string = ""
 ): return_status {
     let message_copy: message = parse(stringify(message))
     let directory: directory = parse(stringify(get_directory_by_name(dictionary, message_copy.directory_path)))
@@ -298,7 +300,7 @@ export function modify_message(
         if (directory.messages[i].comserver === message.comserver &&
             directory.messages[i].description === message.description &&
             JSON.stringify(directory.messages[i].scripts) === JSON.stringify(message.scripts) &&
-            directory.messages[i].raw_message === message.raw_message) {
+            directory.messages[i].raw_message === message.raw_message && directory.messages[i].notes === message.notes) {
             found = true
             continue;
         }
@@ -310,17 +312,18 @@ export function modify_message(
             map: dictionary,
             status: false,
             message:
-                "message you are trying to delete doesn't exist in the directory!"
+                "message you are trying to modify doesn't exist in the directory!"
         }
     }
     // remove old unmodified message
     directory.messages = [...new_messages]
-    message_copy.comserver = comserver == null ? message.comserver : comserver
+    message_copy.comserver = comserver == "" ? message.comserver : comserver
     message_copy.raw_message =
-        raw_message == null ? message.raw_message : raw_message
-    message_copy.scripts = scripts == null ? message.scripts : scripts
+        raw_message == "" ? message.raw_message : raw_message
+    message_copy.scripts = scripts.length === 0 ? message.scripts : scripts
+    message_copy.notes = "" ? message.notes : notes
     message_copy.description =
-        description == null ? message.description : description
+        description == "" ? message.description : description
     message_copy.id = message.id
     directory.messages.push(message_copy)
     dictionary.set(hash_value_directory, directory)
