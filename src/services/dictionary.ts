@@ -3,7 +3,7 @@ import directory, {
   get_directory_name,
   get_path_from_root,
   get_parent_path_from_root
-} from '../types/directory.ts'
+} from '../types/directory'
 // @ts-ignore
 import message from '../types/message.ts'
 // @ts-ignore

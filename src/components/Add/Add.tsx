@@ -245,6 +245,7 @@ export function Add() {
                     add_notes.current.style.height = add_notes.current.scrollHeight + "px"
                   }}
                   onKeyDown={(e) => { handleTextAreaInput(e, add_notes) }}
+
                 />
               </Form.Group>
               <Form.Group
