@@ -323,7 +323,7 @@ export function Add () {
                       as='textarea'
                       // @ts-ignore
                       ref={add_notes}
-                      defaultValue={form_data.scripts}
+                      defaultValue={form_data.notes}
                       style={{
                         minHeight: '5rem',
                         overflow: 'hidden',

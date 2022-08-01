@@ -56,14 +56,13 @@ export function Window ({ current_directory }) {
           return (
             <div
               className='row'
-              style={{ minWidth: '40rem' }}
               key={index}
               id={'row'.concat(index.toString())}
             >
               {row.map(entry => {
                 return entry == 'final item' ? (
                   <div
-                    className='col-xl-2 col-lg-2 col-md-2 col-sm-6 col-12'
+                    className='col-xl-2 col-lg-4 col-md-4 col-sm-6 col-12'
                     key={'FINAL ITEM'}
                   >
                     <Add />
@@ -71,14 +70,14 @@ export function Window ({ current_directory }) {
                 ) : // @ts-ignore
                 entry.type === 'message' ? (
                   <div
-                    className='col-xl-2 col-lg-2 col-md-2 col-sm-6 col-12'
+                    className='col-xl-2 col-lg-4 col-md-4 col-sm-6 col-12'
                     key={entry.id}
                   >
                     <Message message={entry} />
                   </div>
                 ) : (
                   <div
-                    className='col-xl-2 col-lg-2 col-md-2 col-sm-6 col-12'
+                    className='col-xl-2 col-lg-4 col-md-4 col-sm-6 col-12'
                     key={hasher.hash(entry)}
                   >
                     <Folder folder={entry} />

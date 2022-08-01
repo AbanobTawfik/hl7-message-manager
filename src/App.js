@@ -1,14 +1,14 @@
 import './App.css'
 import React, { Component, useState, useMemo } from 'react'
 import Dictionary from './components/Dictionary/Dictionary'
-import Back from './components/Back/Back'
+import Navigation from './components/Navigation/Navigation'
 import { bindActionCreators } from 'redux'
 
-function App () {
+function App() {
   return (
     <div className='App' id='APPJS'>
+      {<Navigation/>}
       <header className='App-header'>
-        {<Back />}
         {<Dictionary />}
       </header>
     </div>
