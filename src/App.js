@@ -7,10 +7,8 @@ import { bindActionCreators } from 'redux'
 function App() {
   return (
     <div className='App' id='APPJS'>
-      {<Navigation/>}
-      <header className='App-header'>
-        {<Dictionary />}
-      </header>
+      {<Navigation />}
+      <div>{<Dictionary />}</div>
     </div>
   )
 }

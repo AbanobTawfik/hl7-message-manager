@@ -104,7 +104,13 @@ const slice = createSlice({
                 toast.error(check.message, toast_settings)
             }
         },
-        
+        search_map: (state, action) => {
+            let map_to_use = new Map(parse(state.map_string))
+            let check = mapper.search(map_to_use, action.payload.search_query);
+            if(check.status){
+                state.map_string = stringify(Array.from(check.map.entries))
+            }
+        },
         load_ids: (state, action) => {
             let map_to_use = new Map(parse(state.map_string))
             let check = mapper.add_uids_to_everything(map_to_use);
@@ -120,6 +126,6 @@ const slice = createSlice({
     }
 });
 
-export const { load_ids, add_directory, add_message, remove_directory, remove_message, modify_directory, modify_message } = slice.actions;
+export const { load_ids, add_directory, add_message, remove_directory, remove_message, modify_directory, modify_message, search_map } = slice.actions;
 
 export default slice.reducer;

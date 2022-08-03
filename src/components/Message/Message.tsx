@@ -48,7 +48,6 @@ export function Message ({ message }) {
   const dispatch = useDispatch()
 
   let all_scripts_string = ''
-  let raw_message = '123'
   if (message.scripts.length > 0) {
     all_scripts_string = message.scripts
       .slice(1)

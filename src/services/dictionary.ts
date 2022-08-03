@@ -14,9 +14,13 @@ import hasher from './hash.ts'
 import { write_file } from '../services/database.ts'
 import { stringify, parse } from 'circular-json'
 import { uid } from 'uid'
+import fuzzysort from 'fuzzysort'
+const { Index, Document, Worker } = require("flexsearch");
+
+
 
 // passive
-export function get_directory_by_name (
+export function get_directory_by_name(
   dictionary: Map<number, directory>,
   path: string
 ): directory {
@@ -25,12 +29,12 @@ export function get_directory_by_name (
 }
 
 // passive
-export function get_directory_path (directory: directory): string {
+export function get_directory_path(directory: directory): string {
   return get_path_from_root(directory)
 }
 
 // passive
-export function get_all_directory_names (
+export function get_all_directory_names(
   dictionary: Map<number, directory>
 ): string[] {
   let directory_names: string[] = []
@@ -41,7 +45,7 @@ export function get_all_directory_names (
 }
 
 // modifiying
-export function create_root (
+export function create_root(
   dictionary: Map<number, directory>
 ): return_status {
   let root: directory = {
@@ -62,7 +66,7 @@ export function create_root (
 }
 
 // modifying
-export function add_directory (
+export function add_directory(
   dictionary: Map<number, directory>,
   parent_directory_path: string,
   name: string
@@ -98,7 +102,7 @@ export function add_directory (
 }
 
 // modifying
-export function add_message (
+export function add_message(
   dictionary: Map<number, directory>,
   directory_path: string,
   comserver: string = '',
@@ -157,7 +161,7 @@ export function add_message (
 }
 
 // modifying
-export function remove_directory (
+export function remove_directory(
   dictionary: Map<number, directory>,
   directory_string: string
 ): return_status {
@@ -209,7 +213,7 @@ export function remove_directory (
 }
 
 // modifying
-export function remove_message (
+export function remove_message(
   dictionary: Map<number, directory>,
   message: message
 ): return_status {
@@ -232,7 +236,7 @@ export function remove_message (
       directory.messages[i].comserver === message.comserver &&
       directory.messages[i].description === message.description &&
       JSON.stringify(directory.messages[i].scripts) ===
-        JSON.stringify(message.scripts) &&
+      JSON.stringify(message.scripts) &&
       directory.messages[i].raw_message === message.raw_message
     ) {
       found = true
@@ -262,7 +266,7 @@ export function remove_message (
 }
 
 // modifying
-export function modify_directory (
+export function modify_directory(
   dictionary: Map<number, directory>,
   directory_path: string,
   name: string
@@ -356,7 +360,7 @@ export function modify_directory (
 }
 
 // modifying
-export function modify_message (
+export function modify_message(
   dictionary: Map<number, directory>,
   message: message,
   raw_message: string = '',
@@ -385,7 +389,7 @@ export function modify_message (
       directory.messages[i].comserver === message.comserver &&
       directory.messages[i].description === message.description &&
       JSON.stringify(directory.messages[i].scripts) ===
-        JSON.stringify(message.scripts) &&
+      JSON.stringify(message.scripts) &&
       directory.messages[i].raw_message === message.raw_message &&
       directory.messages[i].notes === message.notes
     ) {
@@ -430,8 +434,49 @@ export function modify_message (
   }
 }
 
+// modifying
+export function search(dictionary: Map<number, directory>, search_query: string): return_status {
+  // step 1 need to get all messages
+  let all_messages = []
+  console.log("HI")
+  for (let [key, value] of dictionary) {
+    all_messages.push(...value.messages)
+  }
+  // step 2 filter results based on search
+  let results = fuzzysort.go('RDE', all_messages, {
+    keys: ['comserver', 'description', 'scripts', 'notes', 'raw_message'],
+    // Create a custom combined score to sort by. -100 to the desc score makes it a worse match
+    scoreFn: a => Math.max(a[0]?a[0].score:-1000, a[1]?a[1].score-100:-1000)
+  })
+  console.log(results)
+  
+  // step 3 create new "Search Result Directory"
+  let root: directory = {
+    parent_directory: '',
+    sub_directories: [],
+    name: 'root',
+    messages: [],
+    type: 'directory',
+    id: uid(32)
+  }
+  let hash_value: number = hasher.hash(root)
+  if (dictionary.has(hash_value)) {
+    return { map: dictionary, status: false, message: 'Root already exists' }
+  }
+  dictionary.set(hash_value, root)
+
+
+  console.log(all_messages)
+
+}
+
+// modifying
+export function search_filtered(dictionary: Map<number, directory>, search_query: string, comserver: string, scripts: string): return_status {
+  // step 1 need to get all messages qualified on this filter!!!!!!!!!!!!
+}
+
 // passive
-export function get_all_messages (
+export function get_all_messages(
   dictionary: Map<number, directory>,
   directory: directory
 ): message[] {
@@ -443,7 +488,7 @@ export function get_all_messages (
 }
 
 // passive
-export function get_all_directories_from_current (
+export function get_all_directories_from_current(
   dictionary: Map<number, directory>,
   name: string
 ): directory[] {
@@ -459,8 +504,9 @@ export function get_all_directories_from_current (
   return all_dirs_from_current
 }
 
+
 // add uids only need to ever do this once and now
-export function add_uids_to_everything (dictionary: Map<number, directory>) {
+export function add_uids_to_everything(dictionary: Map<number, directory>) {
   for (let [key, value] of dictionary) {
     let entry_copy: directory = parse(stringify(value))
     entry_copy.id = uid(32)
