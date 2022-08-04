@@ -17,10 +17,8 @@ import { uid } from 'uid'
 import Fuse from 'fuse.js'
 import global_variables from '../globals/global_variables'
 
-
-
 // passive
-export function get_directory_by_name(
+export function get_directory_by_name (
   dictionary: Map<number, directory>,
   path: string
 ): directory {
@@ -29,12 +27,12 @@ export function get_directory_by_name(
 }
 
 // passive
-export function get_directory_path(directory: directory): string {
+export function get_directory_path (directory: directory): string {
   return get_path_from_root(directory)
 }
 
 // passive
-export function get_all_directory_names(
+export function get_all_directory_names (
   dictionary: Map<number, directory>
 ): string[] {
   let directory_names: string[] = []
@@ -45,7 +43,7 @@ export function get_all_directory_names(
 }
 
 // modifiying
-export function create_root(
+export function create_root (
   dictionary: Map<number, directory>
 ): return_status {
   let root: directory = {
@@ -66,7 +64,7 @@ export function create_root(
 }
 
 // modifying
-export function add_directory(
+export function add_directory (
   dictionary: Map<number, directory>,
   parent_directory_path: string,
   name: string
@@ -102,7 +100,7 @@ export function add_directory(
 }
 
 // modifying
-export function add_message(
+export function add_message (
   dictionary: Map<number, directory>,
   directory_path: string,
   comserver: string = '',
@@ -161,7 +159,7 @@ export function add_message(
 }
 
 // modifying
-export function remove_directory(
+export function remove_directory (
   dictionary: Map<number, directory>,
   directory_string: string
 ): return_status {
@@ -213,7 +211,7 @@ export function remove_directory(
 }
 
 // modifying
-export function remove_message(
+export function remove_message (
   dictionary: Map<number, directory>,
   message: message
 ): return_status {
@@ -236,7 +234,7 @@ export function remove_message(
       directory.messages[i].comserver === message.comserver &&
       directory.messages[i].description === message.description &&
       JSON.stringify(directory.messages[i].scripts) ===
-      JSON.stringify(message.scripts) &&
+        JSON.stringify(message.scripts) &&
       directory.messages[i].raw_message === message.raw_message
     ) {
       found = true
@@ -266,7 +264,7 @@ export function remove_message(
 }
 
 // modifying
-export function modify_directory(
+export function modify_directory (
   dictionary: Map<number, directory>,
   directory_path: string,
   name: string
@@ -360,7 +358,7 @@ export function modify_directory(
 }
 
 // modifying
-export function modify_message(
+export function modify_message (
   dictionary: Map<number, directory>,
   message: message,
   raw_message: string = '',
@@ -389,7 +387,7 @@ export function modify_message(
       directory.messages[i].comserver === message.comserver &&
       directory.messages[i].description === message.description &&
       JSON.stringify(directory.messages[i].scripts) ===
-      JSON.stringify(message.scripts) &&
+        JSON.stringify(message.scripts) &&
       directory.messages[i].raw_message === message.raw_message &&
       directory.messages[i].notes === message.notes
     ) {
@@ -435,7 +433,11 @@ export function modify_message(
 }
 
 // modifying
-export function search(dictionary: Map<number, directory>, search_query: string, parent_directory: string): return_status {
+export function search (
+  dictionary: Map<number, directory>,
+  search_query: string,
+  parent_directory: string
+): return_status {
   // step 1 need to get all messages
   let search_dir: directory = {
     parent_directory: parent_directory,
@@ -448,7 +450,7 @@ export function search(dictionary: Map<number, directory>, search_query: string,
 
   let hash_value: number = hasher.hash(search_dir)
   let all_messages = []
-  console.log("HI")
+  console.log('HI')
   for (let [key, value] of dictionary) {
     if (key === hash_value) {
       continue
@@ -457,9 +459,16 @@ export function search(dictionary: Map<number, directory>, search_query: string,
   }
 
   const options = {
-    keys: ['comserver', 'description', 'scripts', 'raw_message', 'notes'],
-    // ignoreLocation: true,
-    threshold: 0.5
+    keys: [
+      'comserver',
+      'description',
+      'scripts',
+      { name: 'raw_message', weight: 1 },
+      'notes'
+    ],
+    ignoreLocation: true,
+    threshold: 0.1,
+    distance: search_query.length + 10
   }
 
   const fuse = new Fuse(all_messages, options)
@@ -481,12 +490,17 @@ export function search(dictionary: Map<number, directory>, search_query: string,
 }
 
 // modifying
-export function search_filtered(dictionary: Map<number, directory>, search_query: string, comserver: string, scripts: string): return_status {
+export function search_filtered (
+  dictionary: Map<number, directory>,
+  search_query: string,
+  comserver: string,
+  scripts: string
+): return_status {
   // step 1 need to get all messages qualified on this filter!!!!!!!!!!!!
 }
 
 // passive
-export function get_all_messages(
+export function get_all_messages (
   dictionary: Map<number, directory>,
   directory: directory
 ): message[] {
@@ -498,7 +512,7 @@ export function get_all_messages(
 }
 
 // passive
-export function get_all_directories_from_current(
+export function get_all_directories_from_current (
   dictionary: Map<number, directory>,
   name: string
 ): directory[] {
@@ -514,9 +528,8 @@ export function get_all_directories_from_current(
   return all_dirs_from_current
 }
 
-
 // add uids only need to ever do this once and now
-export function add_uids_to_everything(dictionary: Map<number, directory>) {
+export function add_uids_to_everything (dictionary: Map<number, directory>) {
   for (let [key, value] of dictionary) {
     let entry_copy: directory = parse(stringify(value))
     entry_copy.id = uid(32)
@@ -536,7 +549,9 @@ export function add_uids_to_everything(dictionary: Map<number, directory>) {
 }
 
 // passive
-export function map_scripts_to_comserver(dictionary: Map<string, directory>): Map<string, string[]> {
+export function map_scripts_to_comserver (
+  dictionary: Map<string, directory>
+): Map<string, string[]> {
   let ret: Map<string, string[]> = new Map<string, string[]>()
   for (let [key, value] of dictionary) {
     for (let i = 0; i < value.messages.length; i++) {
@@ -551,17 +566,22 @@ export function map_scripts_to_comserver(dictionary: Map<string, directory>): Ma
       }
     }
   }
-  write_keys(global_variables.script_comserver_map, stringify(Array.from(ret.entries())))
-  return ret;
+  write_keys(
+    global_variables.script_comserver_map,
+    stringify(Array.from(ret.entries()))
+  )
+  return ret
 }
 
 // passive
-export function map_comserver_to_scripts(dictionary: Map<string, directory>): Map<string, string[]> {
+export function map_comserver_to_scripts (
+  dictionary: Map<string, directory>
+): Map<string, string[]> {
   let ret: Map<string, string[]> = new Map<string, string[]>()
   for (let [key, value] of dictionary) {
     for (let i = 0; i < value.messages.length; i++) {
-      if (value.messages[i].comserver === "") {
-        continue;
+      if (value.messages[i].comserver === '') {
+        continue
       }
       if (ret.has(value.messages[i].comserver)) {
         let new_vals = ret.get(value.messages[i].comserver)
@@ -573,6 +593,9 @@ export function map_comserver_to_scripts(dictionary: Map<string, directory>): Ma
       }
     }
   }
-  write_keys(global_variables.comserver_script_map, stringify(Array.from(ret.entries())))
-  return ret;
+  write_keys(
+    global_variables.comserver_script_map,
+    stringify(Array.from(ret.entries()))
+  )
+  return ret
 }
