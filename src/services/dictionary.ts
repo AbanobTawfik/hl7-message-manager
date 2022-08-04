@@ -442,13 +442,42 @@ export function search(dictionary: Map<number, directory>, search_query: string)
   for (let [key, value] of dictionary) {
     all_messages.push(...value.messages)
   }
+  // mapping id to message
+  let message_map = {}
+  for(let i = 0; i < all_messages[i]; i++){
+    message_map[all_messages[i].id] = all_messages[i]
+  }
+  let all_messages_scripts_fixed = []
+  for(let i = 0; i < all_messages.length; i++){
+    let all_scripts_string = ''
+    if (all_messages[i].scripts.length > 0) {
+      all_scripts_string = all_messages[i].scripts
+        .slice(1)
+        .reduce(
+          (previous_value, current_value) =>
+            previous_value + ' ' + current_value,
+            all_messages[i].scripts[0]
+        )
+    }
+    all_messages_scripts_fixed.push({id:all_messages[i].id, comserver:all_messages[i].comserver, description: all_messages[i].description, scripts: all_scripts_string,notes:all_messages[i].notes, raw_message:all_messages[i].raw_message})
+  }
+  
+  console.log(all_messages_scripts_fixed)
+  console.log(all_messages)
   // step 2 filter results based on search
-  let results = fuzzysort.go('RDE', all_messages, {
+  let results = fuzzysort.go(search_query, all_messages_scripts_fixed, {
     keys: ['comserver', 'description', 'scripts', 'notes', 'raw_message'],
     // Create a custom combined score to sort by. -100 to the desc score makes it a worse match
     scoreFn: a => Math.max(a[0]?a[0].score:-1000, a[1]?a[1].score-100:-1000)
   })
+  let filtered_results = []
+  for(let i = 0; i < results.length; i++){
+    if(results[i].score > -300){
+      filtered_results.push(results[i].obj)
+    }
+  }
   console.log(results)
+  console.log(filtered_results)
   
   // step 3 create new "Search Result Directory"
   let root: directory = {

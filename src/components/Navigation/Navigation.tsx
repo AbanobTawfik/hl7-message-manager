@@ -20,7 +20,7 @@ export function Navigation() {
     const search_params = search.current.value;
     if (search_params != "") {
       console.log(search_params)
-      dispatch(search_map(search_params))
+      dispatch(search_map({search_query:search_params}))
       // switch current directory to search result directory
       // dispatch(change_current_directory('search results'))
     }
