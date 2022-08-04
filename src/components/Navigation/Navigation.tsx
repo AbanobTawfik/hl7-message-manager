@@ -1,10 +1,13 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 import { Container, Navbar, Form, Button, Row, Col } from 'react-bootstrap';
 import Nav from 'react-bootstrap/Nav';
 import { useDispatch, useSelector } from 'react-redux'
 import { change_current_directory, change_current_directory_no_save } from '../../state/slices/current_directory_slice'
 import { search_map } from '../../state/slices/map_slice'
-
+import { FaCog } from 'react-icons/fa'
+import { Menu, Item, Separator, Submenu, useContextMenu } from 'react-contexify'
+import 'react-contexify/dist/ReactContexify.css'
+import DropDown from '../DropDown/DropDown'
 
 interface NavProps { }
 
@@ -13,7 +16,17 @@ export function Navigation() {
   // @ts-ignore
   const current_directory_path = global_state.current_directory
   // @ts-ignore
-  
+
+  const { show } = useContextMenu({
+    id: "filter"
+  })
+  const handleContextMenu = useCallback(
+    event => {
+      show(event)
+    },
+    ["filter"]
+  )
+
   const search = React.createRef()
   const dispatch = useDispatch()
 
@@ -27,7 +40,7 @@ export function Navigation() {
     const search_params = search.current.value;
     if (search_params != "") {
       console.log(search_params)
-      dispatch(search_map({search_query:search_params, parent_directory: current_directory_path.path}))
+      dispatch(search_map({ search_query: search_params, parent_directory: current_directory_path.path }))
       // switch current directory to search result directory
       dispatch(change_current_directory_no_save('Search Results'))
     }
@@ -44,11 +57,14 @@ export function Navigation() {
               </div>
             </Col>
 
-            <Col sm={12} md={7}>
+            <Col sm={10} md={6}>
               <Form >
 
                 <Form.Control ref={search} type="text" placeholder="Search" className="mr-sm-2" style={{ display: 'initial' }} />
               </Form>
+            </Col>
+            <Col sm={2} md={1}>
+              <DropDown />
             </Col>
 
             <Col sm={12} md={2}>

@@ -49,6 +49,10 @@ export function write_current_directory(directory: string) {
   window.localStorage.setItem(global_variables.current_directory, directory)
 }
 
+export function write_keys(key: string, value: string){
+  window.localStorage.setItem(key, value)
+}
+
 export function read_current_directory() {
   if (window.localStorage.getItem(global_variables.current_directory) == "" || window.localStorage.getItem(global_variables.current_directory) == null) {
     window.localStorage.setItem(global_variables.current_directory, "root")

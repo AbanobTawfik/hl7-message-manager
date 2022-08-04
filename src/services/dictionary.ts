@@ -11,10 +11,11 @@ import return_status from '../types/return_status.ts'
 // @ts-ignore
 import hasher from './hash.ts'
 // @ts-ignore
-import { write_file } from '../services/database.ts'
+import { write_file, write_keys } from '../services/database.ts'
 import { stringify, parse } from 'circular-json'
 import { uid } from 'uid'
 import Fuse from 'fuse.js'
+import global_variables from '../globals/global_variables'
 
 
 
@@ -444,34 +445,34 @@ export function search(dictionary: Map<number, directory>, search_query: string,
     type: 'directory',
     id: uid(32)
   }
-  
+
   let hash_value: number = hasher.hash(search_dir)
   let all_messages = []
   console.log("HI")
   for (let [key, value] of dictionary) {
-    if(key === hash_value){
+    if (key === hash_value) {
       continue
     }
     all_messages.push(...value.messages)
   }
-  
+
   const options = {
     keys: ['comserver', 'description', 'scripts', 'raw_message', 'notes'],
     // ignoreLocation: true,
     threshold: 0.5
   }
-  
+
   const fuse = new Fuse(all_messages, options)
   let results = fuse.search(search_query)
   let item_results = []
-  for(let i = 0; i < results.length; i++){
+  for (let i = 0; i < results.length; i++) {
     item_results.push(results[i].item)
   }
   console.log(item_results)
   // step 3 create new "Search Result Directory"
   search_dir.messages = item_results
   dictionary.set(hash_value, search_dir)
-  
+
   return {
     map: dictionary,
     status: true,
@@ -532,4 +533,46 @@ export function add_uids_to_everything(dictionary: Map<number, directory>) {
     status: true,
     message: 'message has been modified!'
   }
+}
+
+// passive
+export function map_scripts_to_comserver(dictionary: Map<string, directory>): Map<string, string[]> {
+  let ret: Map<string, string[]> = new Map<string, string[]>()
+  for (let [key, value] of dictionary) {
+    for (let i = 0; i < value.messages.length; i++) {
+      for (let j = 0; j < value.messages[i].scripts.length; j++) {
+        if (ret.has(value.messages[i].scripts[j])) {
+          let new_vals = ret.get(value.messages[i].scripts[j])
+          new_vals.push(value.messages[i].comserver)
+          ret.set(value.messages[i].scripts[j], new_vals)
+        } else {
+          ret.set(value.messages[i].scripts[j], [value.messages[i].comserver])
+        }
+      }
+    }
+  }
+  write_keys(global_variables.script_comserver_map, stringify(Array.from(ret.entries())))
+  return ret;
+}
+
+// passive
+export function map_comserver_to_scripts(dictionary: Map<string, directory>): Map<string, string[]> {
+  let ret: Map<string, string[]> = new Map<string, string[]>()
+  for (let [key, value] of dictionary) {
+    for (let i = 0; i < value.messages.length; i++) {
+      if (value.messages[i].comserver === "") {
+        continue;
+      }
+      if (ret.has(value.messages[i].comserver)) {
+        let new_vals = ret.get(value.messages[i].comserver)
+        new_vals.push(...value.messages[i].scripts)
+        ret.set(value.messages[i].comserver, new_vals)
+      } else {
+        console.log(value.messages[i].scripts)
+        ret.set(value.messages[i].comserver, [...value.messages[i].scripts])
+      }
+    }
+  }
+  write_keys(global_variables.comserver_script_map, stringify(Array.from(ret.entries())))
+  return ret;
 }

@@ -1,8 +1,8 @@
 const global_variables = {
-  database_path: 'database.json',
-  tmp_database_path: 'database_tmp.json',
   dictionary_name: 'dictionary',
-  current_directory: 'current_directory'
+  current_directory: 'current_directory',
+  script_comserver_map: 'script_comserver_map',
+  comserver_script_map: 'comserver_script_map'
 }
 
 export default global_variables
