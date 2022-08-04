@@ -1,22 +1,19 @@
 import React, { FC, useCallback, useState } from 'react';
 import { Container, Navbar, Form, Button, Row, Col } from 'react-bootstrap';
 import Nav from 'react-bootstrap/Nav';
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { change_current_directory, change_current_directory_no_save } from '../../state/slices/current_directory_slice'
 import { search_map } from '../../state/slices/map_slice'
-import { FaCog } from 'react-icons/fa'
+import { FaHome } from 'react-icons/fa'
 import { Menu, Item, Separator, Submenu, useContextMenu } from 'react-contexify'
+import styles from './Navigation.module.scss'
 import 'react-contexify/dist/ReactContexify.css'
 import DropDown from '../DropDown/DropDown'
 
 interface NavProps { }
 
 export function Navigation() {
-  const global_state = useSelector((state) => state);
-  // @ts-ignore
-  const current_directory_path = global_state.current_directory
-  // @ts-ignore
-
+  
   const { show } = useContextMenu({
     id: "filter"
   })
@@ -47,13 +44,13 @@ export function Navigation() {
   }
 
   return (
-    <div>
+    <div       className={styles.Nav}    >
       <Navbar bg="dark" variant="dark" style={{ width: '100%' }}>
         <Container>
           <Row style={{ width: 'inherit', textAlign: 'initial' }}>
             <Col sm={12} md={3}>
               <div>
-                <Navbar.Brand style={{ cursor: 'pointer' }} onClick={() => { dispatch(change_current_directory('root')) }}>Home</Navbar.Brand>
+                <Navbar.Brand style={{ cursor: 'pointer' }} onClick={() => { dispatch(change_current_directory('root')) }}><FaHome style={{marginRight:"10px"}}/>Home</Navbar.Brand>
               </div>
             </Col>
 
