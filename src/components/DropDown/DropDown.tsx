@@ -1,13 +1,13 @@
-import React, { FC, useState } from 'react';
-import styles from './DropDown.module.scss';
+import React, { FC, useState } from 'react'
+import styles from './DropDown.module.scss'
 import { FaCog, FaSearch, FaCheckDouble, FaCheck } from 'react-icons/fa'
-import { useSelector } from 'react-redux';
-import { Col, Container, Form, Modal, Row } from 'react-bootstrap';
+import { useSelector } from 'react-redux'
+import { Col, Container, Form, Modal, Row } from 'react-bootstrap'
 
-interface DropDownProps { }
+interface DropDownProps {}
 
-export function DropDown() {
-  const global_state = useSelector((state) => state);
+export function DropDown () {
+  const global_state = useSelector(state => state)
   // @ts-ignore
   const current_directory_path = global_state.current_directory
   // @ts-ignore
@@ -19,19 +19,20 @@ export function DropDown() {
   const all_scripts = [...script_map.keys()]
   const all_comservers = [...comserver_map.keys()]
 
-  const [is_open, toggle_modal] = useState(false);
-  const [is_multi_select, toggle_multi_select] = useState(false);
-  const [selection, setSelection] = useState([]);
+  const [is_open, toggle_modal] = useState(false)
+  const [is_multi_select, toggle_multi_select] = useState(false)
+  const [selection, setSelection] = useState([])
   const modal_ref = React.createRef()
-
-
 
   return (
     <div className={styles.DropDown}>
-      <FaCog style={{ cursor: 'pointer' }} onClick={() => {
-        toggle_modal(true)
-      }}>
-      </FaCog> <Modal
+      <FaCog
+        style={{ cursor: 'pointer' }}
+        onClick={() => {
+          toggle_modal(true)
+        }}
+      ></FaCog>{' '}
+      <Modal
         className={styles.DropDown}
         show={is_open}
         // onAfterOpen={afterOpenModal}
@@ -59,33 +60,41 @@ export function DropDown() {
                       fontSize: '2.5rem',
                       cursor: 'pointer'
                     }}
-                    onClick={() => { }}
+                    onClick={() => {}}
                   />
                 </Col>
                 <Col xs={12} md={6} lg={2} xl={3} sm={6}>
-                  {is_multi_select && "Single Select"}
-                  {!is_multi_select && "Multi Select"}
+                  {is_multi_select && 'Single Select'}
+                  {!is_multi_select && 'Multi Select'}
                   <br />
-                  {is_multi_select && (<FaCheck
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '2.5rem',
-                      cursor: 'pointer'
-                    }}
-                    onClick={() => { toggle_multi_select(false) }}
-                  />)}
-                  {!is_multi_select && (<FaCheckDouble
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '2.5rem',
-                      cursor: 'pointer'
-                    }}
-                    onClick={() => { toggle_multi_select(true) }}
-                  />)}
+                  {is_multi_select && (
+                    <FaCheck
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '2.5rem',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => {
+                        toggle_multi_select(false)
+                      }}
+                    />
+                  )}
+                  {!is_multi_select && (
+                    <FaCheckDouble
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '2.5rem',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => {
+                        toggle_multi_select(true)
+                      }}
+                    />
+                  )}
                   <br />
                 </Col>
               </Row>
@@ -98,17 +107,16 @@ export function DropDown() {
                 className='mb-3'
                 controlId='exampleForm.ControlInput1'
               >
-
                 {is_multi_select && (
                   <div>
                     <Form.Label style={{ fontWeight: 800 }}>
                       Select Scripts
                     </Form.Label>
-                    <Form.Select aria-label="Floating label select example">
+                    <Form.Select aria-label='Floating label select example'>
                       <option>Open this select menu</option>
-                      <option value="1">One</option>
-                      <option value="2">Two</option>
-                      <option value="3">Three</option>
+                      <option value='1'>One</option>
+                      <option value='2'>Two</option>
+                      <option value='3'>Three</option>
                     </Form.Select>
                   </div>
                 )}
@@ -117,7 +125,9 @@ export function DropDown() {
             </Container>
           </Modal.Body>
         </Form>
-      </Modal></div>);
+      </Modal>
+    </div>
+  )
 }
 
-export default DropDown;
+export default DropDown
