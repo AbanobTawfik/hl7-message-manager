@@ -2,11 +2,18 @@ import React, { FC, useState } from 'react';
 import { Container, Navbar, Form, Button, Row, Col } from 'react-bootstrap';
 import Nav from 'react-bootstrap/Nav';
 import { useDispatch, useSelector } from 'react-redux'
-import { change_current_directory } from '../../state/slices/current_directory_slice'
+import { change_current_directory, change_current_directory_no_save } from '../../state/slices/current_directory_slice'
 import { search_map } from '../../state/slices/map_slice'
+
+
 interface NavProps { }
 
 export function Navigation() {
+  const global_state = useSelector((state) => state);
+  // @ts-ignore
+  const current_directory_path = global_state.current_directory
+  // @ts-ignore
+  
   const search = React.createRef()
   const dispatch = useDispatch()
 
@@ -20,9 +27,9 @@ export function Navigation() {
     const search_params = search.current.value;
     if (search_params != "") {
       console.log(search_params)
-      dispatch(search_map({search_query:search_params}))
+      dispatch(search_map({search_query:search_params, parent_directory: current_directory_path.path}))
       // switch current directory to search result directory
-      // dispatch(change_current_directory('search results'))
+      dispatch(change_current_directory_no_save('Search Results'))
     }
   }
 

@@ -12,15 +12,15 @@ type directory = {
 export default directory
 
 export function get_path_from_root (directory: directory): string {
-  if (directory.name === 'root') {
-    return 'root'
+  if (directory.name === 'root' || directory.name === 'Search Results') {
+    return directory.name
   }
   return directory.parent_directory + '/' + directory.name
 }
 
 export function get_parent_path_from_root (directory: directory): string {
   if (directory.name === 'root') {
-    return 'root'
+    return directory.name
   }
   return directory.parent_directory
 }

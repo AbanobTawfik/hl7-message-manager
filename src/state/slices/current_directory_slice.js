@@ -11,13 +11,15 @@ const slice = createSlice({
     },
     reducers:{
         change_current_directory: (state, action) => {
-            console.log(action.payload)
             dba.write_current_directory(action.payload);
             state.path = action.payload
-        }
+        },
+        change_current_directory_no_save:  (state, action) => {
+            state.path = action.payload
+        },
     }
 });
 
-export const {change_current_directory} = slice.actions;
+export const {change_current_directory, change_current_directory_no_save} = slice.actions;
 
 export default slice.reducer;

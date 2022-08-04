@@ -26,7 +26,7 @@ export function Window ({ current_directory }) {
   const dictionary: Map<number, directory> = new Map(
     parse(global_state.map.map_string)
   )
-
+  console.log(dictionary)
   let all_subs = mapper.get_all_directories_from_current(
     dictionary,
     direct.get_path_from_root(current_directory)

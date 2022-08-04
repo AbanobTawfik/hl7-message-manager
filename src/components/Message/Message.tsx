@@ -14,10 +14,11 @@ import message from '../../types/message.ts'
 import message_icon from '../../resources/Icons/message.png'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import { Modal, Button, Row, Container, Col, Form } from 'react-bootstrap'
-import { FaCopy, FaEdit, FaSave, FaEye, FaBookOpen } from 'react-icons/fa'
+import { Modal, Row, Container, Col, Form } from 'react-bootstrap'
+import { FaCopy, FaEdit, FaSave, FaEye, FaBookOpen, FaFolder } from 'react-icons/fa'
 import { useDispatch } from 'react-redux'
 import { modify_message, remove_message } from '../../state/slices/map_slice.js'
+import { change_current_directory, change_current_directory_no_save } from '../../state/slices/current_directory_slice'
 import { Menu, Item, Separator, Submenu, useContextMenu } from 'react-contexify'
 import 'react-contexify/dist/ReactContexify.css'
 
@@ -239,7 +240,7 @@ export function Message ({ message }) {
               </Row>
               <hr />
               <Row style={{ fontSize: '0.98rem' }}>
-                <Col xs={12} md={6} lg={2} xl={3} sm={6}>
+                <Col xs={12} md={6} lg={2} xl={2} sm={6}>
                   Copy
                   <br />
                   <FaCopy
@@ -268,7 +269,7 @@ export function Message ({ message }) {
                     }}
                   />
                 </Col>
-                <Col xs={12} md={6} lg={2} xl={3} sm={6}>
+                <Col xs={12} md={6} lg={2} xl={2} sm={6}>
                   {!is_editing && 'Edit'}
                   {is_editing && 'View'}
                   <br />
@@ -303,7 +304,7 @@ export function Message ({ message }) {
                     />
                   )}
                 </Col>
-                <Col xs={12} md={6} lg={2} xl={3} sm={6}>
+                <Col xs={12} md={6} lg={2} xl={2} sm={6}>
                   {view_notes && 'View'}
                   {view_notes && <br /> && (
                     <FaEye
@@ -345,7 +346,7 @@ export function Message ({ message }) {
                     />
                   )}
                 </Col>
-                <Col xs={12} md={6} lg={2} xl={3} sm={6}>
+                <Col xs={12} md={6} lg={2} xl={2} sm={6}>
                   Save
                   <br />
                   <FaSave
@@ -358,6 +359,20 @@ export function Message ({ message }) {
                       cursor: is_saveable ? 'pointer' : 'not-allowed'
                     }}
                     onClick={modify_message_dispatch}
+                  />
+                </Col>
+                <Col xs={12} md={6} lg={2} xl={2} sm={6}>
+                  Location
+                  <br />
+                  <FaFolder
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      fontSize: '2.5rem'
+                    }}
+                    onClick={() => {dispatch(change_current_directory(message.directory_path))}}
                   />
                 </Col>
               </Row>

@@ -106,9 +106,9 @@ const slice = createSlice({
         },
         search_map: (state, action) => {
             let map_to_use = new Map(parse(state.map_string))
-            let check = mapper.search(map_to_use, action.payload.search_query);
+            let check = mapper.search(map_to_use, action.payload.search_query, action.payload.parent_directory);
             if(check.status){
-                state.map_string = stringify(Array.from(check.map.entries))
+                state.map_string = stringify(Array.from(check.map.entries()))
             }
         },
         load_ids: (state, action) => {

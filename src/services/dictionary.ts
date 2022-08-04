@@ -14,8 +14,7 @@ import hasher from './hash.ts'
 import { write_file } from '../services/database.ts'
 import { stringify, parse } from 'circular-json'
 import { uid } from 'uid'
-import fuzzysort from 'fuzzysort'
-const { Index, Document, Worker } = require("flexsearch");
+import Fuse from 'fuse.js'
 
 
 
@@ -435,68 +434,49 @@ export function modify_message(
 }
 
 // modifying
-export function search(dictionary: Map<number, directory>, search_query: string): return_status {
+export function search(dictionary: Map<number, directory>, search_query: string, parent_directory: string): return_status {
   // step 1 need to get all messages
-  let all_messages = []
-  console.log("HI")
-  for (let [key, value] of dictionary) {
-    all_messages.push(...value.messages)
-  }
-  // mapping id to message
-  let message_map = {}
-  for(let i = 0; i < all_messages[i]; i++){
-    message_map[all_messages[i].id] = all_messages[i]
-  }
-  let all_messages_scripts_fixed = []
-  for(let i = 0; i < all_messages.length; i++){
-    let all_scripts_string = ''
-    if (all_messages[i].scripts.length > 0) {
-      all_scripts_string = all_messages[i].scripts
-        .slice(1)
-        .reduce(
-          (previous_value, current_value) =>
-            previous_value + ' ' + current_value,
-            all_messages[i].scripts[0]
-        )
-    }
-    all_messages_scripts_fixed.push({id:all_messages[i].id, comserver:all_messages[i].comserver, description: all_messages[i].description, scripts: all_scripts_string,notes:all_messages[i].notes, raw_message:all_messages[i].raw_message})
-  }
-  
-  console.log(all_messages_scripts_fixed)
-  console.log(all_messages)
-  // step 2 filter results based on search
-  let results = fuzzysort.go(search_query, all_messages_scripts_fixed, {
-    keys: ['comserver', 'description', 'scripts', 'notes', 'raw_message'],
-    // Create a custom combined score to sort by. -100 to the desc score makes it a worse match
-    scoreFn: a => Math.max(a[0]?a[0].score:-1000, a[1]?a[1].score-100:-1000)
-  })
-  let filtered_results = []
-  for(let i = 0; i < results.length; i++){
-    if(results[i].score > -300){
-      filtered_results.push(results[i].obj)
-    }
-  }
-  console.log(results)
-  console.log(filtered_results)
-  
-  // step 3 create new "Search Result Directory"
-  let root: directory = {
-    parent_directory: '',
+  let search_dir: directory = {
+    parent_directory: parent_directory,
     sub_directories: [],
-    name: 'root',
+    name: 'Search Results',
     messages: [],
     type: 'directory',
     id: uid(32)
   }
-  let hash_value: number = hasher.hash(root)
-  if (dictionary.has(hash_value)) {
-    return { map: dictionary, status: false, message: 'Root already exists' }
+  
+  let hash_value: number = hasher.hash(search_dir)
+  let all_messages = []
+  console.log("HI")
+  for (let [key, value] of dictionary) {
+    if(key === hash_value){
+      continue
+    }
+    all_messages.push(...value.messages)
   }
-  dictionary.set(hash_value, root)
-
-
-  console.log(all_messages)
-
+  
+  const options = {
+    keys: ['comserver', 'description', 'scripts', 'raw_message', 'notes'],
+    // ignoreLocation: true,
+    threshold: 0.5
+  }
+  
+  const fuse = new Fuse(all_messages, options)
+  let results = fuse.search(search_query)
+  let item_results = []
+  for(let i = 0; i < results.length; i++){
+    item_results.push(results[i].item)
+  }
+  console.log(item_results)
+  // step 3 create new "Search Result Directory"
+  search_dir.messages = item_results
+  dictionary.set(hash_value, search_dir)
+  
+  return {
+    map: dictionary,
+    status: true,
+    message: 'search returned!'
+  }
 }
 
 // modifying
