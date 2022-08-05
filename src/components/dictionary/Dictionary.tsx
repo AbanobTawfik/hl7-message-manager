@@ -37,7 +37,7 @@ export function Dictionary(DictionaryProps) {
               <Col sm={1}>
                 <Back />
               </Col>
-              <Col sm={1}>
+              <Col style={{textAlign:'left'}}sm={11}>
                 {current_directory_path.path}
               </Col>
             </Row>

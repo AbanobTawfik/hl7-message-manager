@@ -20,6 +20,7 @@
     "fuzzysort": "^2.0.1",
     "immer": "^9.0.15",
     "jsdiff": "^1.1.1",
+    "multiselect-react-dropdown": "^2.0.25",
     "node-fetch": "^2.6.7",
     "node-sass": "^7.0.1",
     "npm": "^8.7.0",

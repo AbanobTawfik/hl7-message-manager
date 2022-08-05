@@ -16,15 +16,6 @@ import DropDown from '../DropDown/DropDown'
 interface NavProps {}
 
 export function Navigation () {
-  const { show } = useContextMenu({
-    id: 'filter'
-  })
-  const handleContextMenu = useCallback(
-    event => {
-      show(event)
-    },
-    ['filter']
-  )
   const global_state = useSelector(state => state)
   // @ts-ignore
   const current_directory_path = global_state.current_directory
