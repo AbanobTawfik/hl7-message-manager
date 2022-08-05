@@ -4,6 +4,7 @@ import { FaCog, FaSearch, FaCheckDouble, FaCheck } from 'react-icons/fa'
 import { useDispatch, useSelector } from 'react-redux'
 import { Col, Container, Form, Modal, Row } from 'react-bootstrap'
 import Multiselect from 'multiselect-react-dropdown'
+import { search_filtered } from '../../services/dictionary'
 
 interface DropDownProps {}
 
@@ -34,6 +35,9 @@ export function DropDown () {
     all_comservers
   )
 
+  const [search_comserver, set_search_comserver] = useState([])
+  const [search_script, set_search_script] = useState([])
+
   const comserver_ref = React.createRef()
   const script_ref = React.createRef()
   const search_ref = React.createRef()
@@ -62,6 +66,36 @@ export function DropDown () {
       filtered_comservers.splice(0, 0, { name: '' })
     }
     set_comserver_selection(filtered_comservers)
+  }
+
+  const send_search_filtered = () => {
+    // we will create a new Directory, with no parent called search result, this is a temporary special directory
+    // this directory will not be saved, but contain just the search results of the query (note no call to write_file in dictionary)
+    // inside messages we will have link to directory if user wants to access directory. This will be simpler than having
+    // different "search states"
+
+    // grab the query
+    const search_params = search_ref.current.value
+    const comservers = comserver_ref.current
+    const scripts = script_ref.current
+    if (search_params != '') {
+      console.log({
+        search_query: search_params,
+        comservers: comservers,
+        scripts: scripts,
+        parent_directory: current_directory_path.path
+      })
+      // dispatch(
+      //   search_map_filtered({
+      //     search_query: search_params,
+      //     comservers: comservers,
+      //     scripts: scripts,
+      //     parent_directory: current_directory_path.path
+      //   })
+      // )
+      // // switch current directory to search result directory
+      // dispatch(change_current_directory_no_save('Search Results'))
+    }
   }
 
   return (
@@ -104,7 +138,7 @@ export function DropDown () {
                       fontSize: '2.5rem',
                       cursor: 'pointer'
                     }}
-                    onClick={() => {}}
+                    onClick={send_search_filtered}
                   />
                 </Col>
                 <Col xs={12} md={6} lg={2} xl={3} sm={6}>

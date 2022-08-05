@@ -457,7 +457,7 @@ export function search (
     }
     all_messages.push(...value.messages)
   }
-
+  console.log(search_query)
   const options = {
     keys: [
       'comserver',
