@@ -556,6 +556,9 @@ export function map_scripts_to_comserver (
   for (let [key, value] of dictionary) {
     for (let i = 0; i < value.messages.length; i++) {
       for (let j = 0; j < value.messages[i].scripts.length; j++) {
+        if (value.messages[i].scripts[j] === '') {
+          continue
+        }
         if (ret.has(value.messages[i].scripts[j])) {
           let new_vals = ret.get(value.messages[i].scripts[j])
           new_vals.push(value.messages[i].comserver)
@@ -585,11 +588,22 @@ export function map_comserver_to_scripts (
       }
       if (ret.has(value.messages[i].comserver)) {
         let new_vals = ret.get(value.messages[i].comserver)
-        new_vals.push(...value.messages[i].scripts)
+        for (let j = 0; j < value.messages[i].scripts.length; j++) {
+          if (value.messages[i].scripts[j] === '') {
+            continue
+          }
+          new_vals?.push(value.messages[i].scripts[j])
+        }
         ret.set(value.messages[i].comserver, new_vals)
       } else {
-        console.log(value.messages[i].scripts)
-        ret.set(value.messages[i].comserver, [...value.messages[i].scripts])
+        let new_vals = []
+        for (let j = 0; j < value.messages[i].scripts.length; j++) {
+          if (value.messages[i].scripts[j] === '') {
+            continue
+          }
+          new_vals?.push(value.messages[i].scripts[j])
+        }
+        ret.set(value.messages[i].comserver, new_vals)
       }
     }
   }
