@@ -466,13 +466,15 @@ export function search (
       { name: 'raw_message', weight: 1 },
       'notes'
     ],
+    includeScore: true,
     ignoreLocation: true,
-    threshold: 0.1,
+    threshold: 0.3,
     distance: search_query.length + 10
   }
 
   const fuse = new Fuse(all_messages, options)
   let results = fuse.search(search_query)
+  console.log(results)
   let item_results = []
   for (let i = 0; i < results.length; i++) {
     item_results.push(results[i].item)
