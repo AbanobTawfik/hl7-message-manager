@@ -255,6 +255,12 @@ export function DropDown () {
                       avoidHighlightFirstOption={true}
                       showArrow={true}
                     />
+                    <div className={styles.astrodivider}>
+                      <div className={styles.astrodividermask}></div>
+                      <span>
+                        <i>&#10038;</i>
+                      </span>
+                    </div>
                   </div>
                 )}
                 {/* {!is_multi_select && ()} */}
