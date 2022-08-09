@@ -75,6 +75,7 @@ export function Add () {
         add_description.current.value = ''
         add_interface.current.value = ''
         add_scripts.current.value = ''
+        add_notes.current.value = ''
         form_data.description = ''
         form_data.scripts = ''
         form_data.raw_data = ''
@@ -332,7 +333,7 @@ export function Add () {
                       onFocus={() => toggle_focus(true)}
                       onBlur={() => toggle_focus(false)}
                       onChange={() => {
-                        form_data.scripts = add_notes.current.value
+                        form_data.notes = add_notes.current.value
                         add_notes.current.style.height = '0px'
                         add_notes.current.style.height =
                           add_notes.current.scrollHeight + 'px'

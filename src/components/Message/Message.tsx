@@ -15,10 +15,20 @@ import message_icon from '../../resources/Icons/message.png'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { Modal, Row, Container, Col, Form } from 'react-bootstrap'
-import { FaCopy, FaEdit, FaSave, FaEye, FaBookOpen, FaFolder } from 'react-icons/fa'
+import {
+  FaCopy,
+  FaEdit,
+  FaSave,
+  FaEye,
+  FaBookOpen,
+  FaFolder
+} from 'react-icons/fa'
 import { useDispatch } from 'react-redux'
 import { modify_message, remove_message } from '../../state/slices/map_slice.js'
-import { change_current_directory, change_current_directory_no_save } from '../../state/slices/current_directory_slice'
+import {
+  change_current_directory,
+  change_current_directory_no_save
+} from '../../state/slices/current_directory_slice'
 import { Menu, Item, Separator, Submenu, useContextMenu } from 'react-contexify'
 import 'react-contexify/dist/ReactContexify.css'
 
@@ -372,7 +382,9 @@ export function Message ({ message }) {
                       cursor: 'pointer',
                       fontSize: '2.5rem'
                     }}
-                    onClick={() => {dispatch(change_current_directory(message.directory_path))}}
+                    onClick={() => {
+                      dispatch(change_current_directory(message.directory_path))
+                    }}
                   />
                 </Col>
               </Row>
