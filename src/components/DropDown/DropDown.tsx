@@ -18,6 +18,7 @@ export function DropDown () {
   const comserver_map_string = global_state.map.comserver_script_map_string
   const comserver_map = new Map(JSON.parse(comserver_map_string))
   // need to get all scripts and all comservers, can be easily gathered from above maps^^, get all entries ez pz
+  console.log('COMSERVERS', comserver_map, '\n', 'SCRIPTS', script_map)
   const all_scripts = [...script_map.keys()].map(value => {
     return { name: value }
   })
