@@ -1,15 +1,7 @@
-import React, {
-  FC,
-  useState,
-  useMemo,
-  useEffect,
-  useCallback,
-  useRef,
-} from "react";
+import React, { useState, useCallback } from "react";
 // @ts-ignore
 import styles from "./Message.module.scss";
 // @ts-ignore
-import message from "../../types/message.ts";
 // @ts-ignore
 import message_icon from "../../resources/Icons/message.png";
 import { toast } from "react-toastify";
@@ -28,17 +20,8 @@ import {
   modify_message,
   remove_message,
 } from "../../state/slices/map_slice.js";
-import {
-  change_current_directory,
-  change_current_directory_no_save,
-} from "../../state/slices/current_directory_slice";
-import {
-  Menu,
-  Item,
-  Separator,
-  Submenu,
-  useContextMenu,
-} from "react-contexify";
+import { change_current_directory } from "../../state/slices/current_directory_slice";
+import { Menu, Item, useContextMenu } from "react-contexify";
 import "react-contexify/dist/ReactContexify.css";
 
 function useHookWithRefCallBack(ref) {
@@ -395,6 +378,7 @@ export function Message({ message }) {
                       dispatch(
                         change_current_directory(message.directory_path)
                       );
+                      toggle_modal(false);
                     }}
                   />
                 </Col>

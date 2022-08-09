@@ -18,20 +18,16 @@ const toast_settings = {
     theme: 'dark'
   }
 let initial_map = stringify(Array.from(dba.read_file().entries()));
-let comserver_script_map = window.localStorage.getItem(global_variables.comserver_script_map)
-if(comserver_script_map === undefined){
-    comserver_script_map = ""
+let project_map = window.localStorage.getItem(global_variables.project_map)
+if(project_map === undefined){
+    project_map = ""
 }
-let script_comserver_map = window.localStorage.getItem(global_variables.script_comserver_map)
-if(script_comserver_map === undefined){
-    script_comserver_map = ""
-}
+
 const slice = createSlice({
     name: "map",
     initialState: {
         map_string: initial_map,
-        comserver_script_map_string: comserver_script_map,
-        script_comserver_map_string: script_comserver_map
+        project_map_string: project_map
     },
     reducers: {
         add_directory: (state, action) => {
@@ -121,8 +117,7 @@ const slice = createSlice({
                 toast.dismiss()
                 toast.success('Message changes saved!', toast_settings);
                 state.map_string = stringify(Array.from(check.map.entries()));
-                state.comserver_script_map_string = stringify(Array.from(mapper.map_comserver_to_scripts(check.map).entries()));
-                state.script_comserver_map_string = stringify(Array.from(mapper.map_scripts_to_comserver(check.map).entries())); 
+                state.project_map_string = stringify(Array.from(mapper.map_project_to_script_comserver(check.map).entries()));
             }else{
                 toast.dismiss()
                 toast.error(check.message, toast_settings)
@@ -139,10 +134,13 @@ const slice = createSlice({
         
         search_filtered: (state, action) => {
             let map_to_use = new Map(parse(state.map_string))
-            let check = mapper.search_filtered(map_to_use, action.payload.search_query,action.payload.comservers, action.payload.scripts, action.payload.parent_directory);
+            let check = mapper.search_filtered(map_to_use, action.payload.search_query,action.payload.comservers, action.payload.scripts, action.payload.parent_directory, action.payload.project);
             if(check.status){
                 state.map_string = stringify(Array.from(check.map.entries())) 
             }
+        },
+        import_dictionary: (state, action) => {
+            state.map_string = window.localStorage.getItem('dictionary')
         },
         
         load_ids: (state, action) => {
@@ -162,6 +160,6 @@ const slice = createSlice({
     }
 });
 
-export const { load_ids, add_directory, add_message, remove_directory, remove_message, modify_directory, modify_message, search_map, search_filtered } = slice.actions;
+export const { load_ids, add_directory, add_message, remove_directory, remove_message, modify_directory, modify_message, search_map, search_filtered, import_dictionary } = slice.actions;
 
 export default slice.reducer;

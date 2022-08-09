@@ -19,6 +19,8 @@ import {
 import styles from "./Navigation.module.scss";
 import "react-contexify/dist/ReactContexify.css";
 import DropDown from "../DropDown/DropDown";
+import Export from "../Export/Export";
+import Import from "../Import/Import";
 
 interface NavProps {}
 
@@ -91,6 +93,12 @@ export function Navigation() {
             </Col>
             <Col sm={2} md={1}>
               <DropDown />
+            </Col>
+            <Col sm={2} md={1} style={{ fontSize: "0.8rem" }}>
+              <Export />
+            </Col>
+            <Col sm={2} md={1} style={{ fontSize: "0.8rem" }}>
+              <Import />
             </Col>
           </Row>
         </Container>

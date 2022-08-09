@@ -500,9 +500,10 @@ export function search_filtered(
   search_query: string,
   comserver: string[],
   scripts: string[],
-  parent_directory: string
+  parent_directory: string,
+  project: string
 ): return_status {
-  if (comserver.length === 0 && scripts.length === 0) {
+  if (comserver.length === 0 && scripts.length === 0 && project === "") {
     return search(dictionary, search_query, parent_directory);
   }
   let search_dir: directory = {
@@ -519,7 +520,22 @@ export function search_filtered(
   let all_messages = JSON.parse(read_messages());
   // filter all messages
   let filtered_messages_map: Map<string, any> = new Map<string, any>();
+  let flag: boolean = false;
+  if (comserver.length === 0 && scripts.length === 0) {
+    flag = true;
+  }
+
   for (let i = 0; i < all_messages.length; i++) {
+    if (
+      project !== "" &&
+      !all_messages[i].directory_path.trim().startsWith(project)
+    ) {
+      continue;
+    }
+    if (flag) {
+      filtered_messages_map.set(all_messages[i].id, all_messages[i]);
+      continue;
+    }
     // go through each script/directory in filter to do this
     for (let j = 0; j < comserver.length; j++) {
       if (comserver[j].trim() === all_messages[i].comserver.trim()) {
@@ -605,11 +621,18 @@ export function add_uids_to_everything(dictionary: Map<number, directory>) {
 
 // passive
 export function map_scripts_to_comserver(
-  dictionary: Map<string, directory>
+  dictionary: Map<number, directory>,
+  project: string
 ): Map<string, string[]> {
   let ret: Map<string, string[]> = new Map<string, string[]>();
   for (let [key, value] of dictionary) {
     for (let i = 0; i < value.messages.length; i++) {
+      if (
+        project !== "" &&
+        !value.messages[i].directory_path.trim().startsWith("root/" + project)
+      ) {
+        continue;
+      }
       for (let j = 0; j < value.messages[i].scripts.length; j++) {
         if (value.messages[i].scripts[j].trim() === "") {
           continue;
@@ -628,20 +651,23 @@ export function map_scripts_to_comserver(
       }
     }
   }
-  write_keys(
-    global_variables.script_comserver_map,
-    stringify(Array.from(ret.entries()))
-  );
   return ret;
 }
 
 // passive
 export function map_comserver_to_scripts(
-  dictionary: Map<string, directory>
+  dictionary: Map<number, directory>,
+  project: string
 ): Map<string, string[]> {
   let ret: Map<string, string[]> = new Map<string, string[]>();
   for (let [key, value] of dictionary) {
     for (let i = 0; i < value.messages.length; i++) {
+      if (
+        project !== "" &&
+        !value.messages[i].directory_path.trim().startsWith("root/" + project)
+      ) {
+        continue;
+      }
       if (value.messages[i].comserver.trim() === "") {
         continue;
       }
@@ -672,10 +698,34 @@ export function map_comserver_to_scripts(
       }
     }
   }
-  write_keys(
-    global_variables.comserver_script_map,
-    stringify(Array.from(ret.entries()))
-  );
+  return ret;
+}
+
+// passive
+export function map_project_to_script_comserver(
+  dictionary: Map<number, directory>
+): Map<string, any> {
+  // we want to compute the above maps on a per project basis!
+  // step 1 get all children of root
+  let ret: Map<string, any> = new Map<string, any>();
+  let root = get_directory_by_name(dictionary, "root");
+  let projects = root.sub_directories;
+  projects.push("");
+  for (let i = 0; i < projects.length; i++) {
+    let maps = {
+      scripts_comserver_map: map_scripts_to_comserver(
+        dictionary,
+        projects[i].replace("root/", "")
+      ),
+      comserver_scripts_map: map_comserver_to_scripts(
+        dictionary,
+        projects[i].replace("root/", "")
+      ),
+    };
+    ret.set(projects[i], maps);
+  }
+  write_keys(global_variables.project_map, JSON.stringify(ret, replacer));
+  console.log(ret);
   return ret;
 }
 
@@ -759,4 +809,15 @@ function search_messages(messages: any[], search_query: string): message[] {
     }
   }
   return item_results;
+}
+
+function replacer(key, value) {
+  if (value instanceof Map) {
+    return {
+      dataType: "Map",
+      value: Array.from(value.entries()), // or with spread: value: [...value]
+    };
+  } else {
+    return value;
+  }
 }

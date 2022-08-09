@@ -10,20 +10,33 @@ import {
   change_current_directory_no_save,
 } from "../../state/slices/current_directory_slice";
 
-let filters = {
-  interfaces: [],
-  scripts: [],
-};
-
+function reviver(key, value) {
+  if (typeof value === "object" && value !== null) {
+    if (value.dataType === "Map") {
+      return new Map(value.value);
+    }
+  }
+  return value;
+}
+const prefix = "root/";
 export function DropDown() {
   const global_state = useSelector((state) => state);
   // @ts-ignore
   const current_directory_path = global_state.current_directory;
   // @ts-ignore
-  const script_map_string = global_state.map.script_comserver_map_string;
-  const script_map = new Map(JSON.parse(script_map_string));
-  const comserver_map_string = global_state.map.comserver_script_map_string;
-  const comserver_map = new Map(JSON.parse(comserver_map_string));
+  const project_map_string = global_state.map.project_map_string;
+  const project_map = new Map(JSON.parse(project_map_string, reviver));
+  let all_projects = [];
+  all_projects.push({ name: "" });
+  for (let [key, value] of project_map) {
+    if (key === "") {
+      continue;
+    }
+    all_projects.push({ name: key.replace(prefix, "") });
+  }
+  console.log(all_projects);
+  const script_map = project_map.get("").scripts_comserver_map;
+  const comserver_map = project_map.get("").comserver_scripts_map;
   // need to get all scripts and all comservers, can be easily gathered from above maps^^, get all entries ez pz
   const all_scripts = [...script_map.keys()].map((value) => {
     return { name: value };
@@ -36,17 +49,14 @@ export function DropDown() {
   all_comservers.splice(0, 0, { name: "" });
   const [is_open, toggle_modal] = useState(false);
   const [is_multi_select, toggle_multi_select] = useState(false);
-
   const [script_selection, set_script_selection] = useState(all_scripts);
+  const [chosen_project, set_project] = useState("");
   const [comserver_selection, set_comserver_selection] =
     useState(all_comservers);
-
   const comserver_ref = React.createRef();
   const script_ref = React.createRef();
   const search_ref = React.createRef();
-
   const dispatch = useDispatch();
-
   const filter_scripts = (value) => {
     let filtered_scripts = comserver_map.has(value)
       ? comserver_map.get(value).map((value) => {
@@ -58,7 +68,6 @@ export function DropDown() {
     }
     set_script_selection(filtered_scripts);
   };
-
   const filter_comservers = (value) => {
     let filtered_comservers = script_map.has(value)
       ? script_map.get(value).map((value) => {
@@ -71,12 +80,35 @@ export function DropDown() {
     set_comserver_selection(filtered_comservers);
   };
 
+  const filter_all_maps = (project) => {
+    let using_prefix = project === "" ? "" : prefix + project;
+    set_project(using_prefix);
+    const new_maps = project_map.get(using_prefix);
+    console.log(new_maps);
+    const all_scripts = [...new_maps.scripts_comserver_map.keys()].map(
+      (value) => {
+        return { name: value };
+      }
+    );
+    const all_comservers = [...new_maps.comserver_scripts_map.keys()].map(
+      (value) => {
+        return { name: value };
+      }
+    );
+    all_scripts.splice(0, 0, { name: "" });
+    all_scripts.splice(all_scripts.length - 1, 1);
+    all_comservers.splice(0, 0, { name: "" });
+    comserver_ref.current.resetSelectedValues();
+    script_ref.current.resetSelectedValues();
+    set_comserver_selection(all_comservers);
+    set_script_selection(all_scripts);
+  };
+
   const send_search_filtered = () => {
     // we will create a new Directory, with no parent called search result, this is a temporary special directory
     // this directory will not be saved, but contain just the search results of the query (note no call to write_file in dictionary)
     // inside messages we will have link to directory if user wants to access directory. This will be simpler than having
     // different "search states"
-
     // grab the query
     const search_params = search_ref.current.value;
     const comservers = comserver_ref.current
@@ -90,6 +122,7 @@ export function DropDown() {
       comservers: comservers,
       scripts: scripts,
       parent_directory: current_directory_path.path,
+      project: chosen_project,
     };
     dispatch(search_filtered(filter_query));
     // switch current directory to search result directory
@@ -98,7 +131,6 @@ export function DropDown() {
     toggle_modal(false);
     dispatch(change_current_directory_no_save("Search Results"));
   };
-
   return (
     <div className={styles.DropDown}>
       <FaCog
@@ -181,7 +213,6 @@ export function DropDown() {
               </Row>
             </Container>
           </Modal.Header>
-
           <Modal.Body>
             <Form.Label style={{ fontWeight: 800 }}>Query</Form.Label>
             <Form.Control
@@ -200,6 +231,22 @@ export function DropDown() {
               >
                 {is_multi_select && (
                   <div>
+                    <Form.Label style={{ fontWeight: 800 }}>
+                      Projects
+                    </Form.Label>
+                    <Multiselect
+                      onSelect={(value) => {
+                        filter_all_maps(value[0].name);
+                      }}
+                      ref={comserver_ref}
+                      singleSelect={true}
+                      options={all_projects} // Options to display in the dropdown
+                      displayValue="name"
+                      avoidHighlightFirstOption={true}
+                      showArrow={true}
+                    />
+                    <br />
+                    <br />
                     <Form.Label style={{ fontWeight: 800 }}>
                       Select Comservers
                     </Form.Label>
@@ -224,9 +271,24 @@ export function DropDown() {
                     />
                   </div>
                 )}
-
                 {!is_multi_select && (
                   <div>
+                    <Form.Label style={{ fontWeight: 800 }}>
+                      Projects
+                    </Form.Label>
+                    <Multiselect
+                      onSelect={(value) => {
+                        filter_all_maps(value[0].name);
+                      }}
+                      ref={comserver_ref}
+                      singleSelect={true}
+                      options={all_projects} // Options to display in the dropdown
+                      displayValue="name"
+                      avoidHighlightFirstOption={true}
+                      showArrow={true}
+                    />
+                    <br />
+                    <br />
                     <Form.Label style={{ fontWeight: 800 }}>
                       Select Comservers
                     </Form.Label>
