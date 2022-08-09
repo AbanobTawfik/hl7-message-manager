@@ -72,6 +72,8 @@ const slice = createSlice({
                 toast.dismiss()
                 toast.success('Directory was removed!', toast_settings);
                 state.map_string = stringify(Array.from(check.map.entries()));
+                state.comserver_script_map_string = stringify(Array.from(mapper.map_comserver_to_scripts(check.map).entries()));
+                state.script_comserver_map_string = stringify(Array.from(mapper.map_scripts_to_comserver(check.map).entries())); 
             }else{
                 toast.dismiss()
                 toast.error(check.message, toast_settings)
@@ -85,6 +87,8 @@ const slice = createSlice({
                 toast.dismiss()
                 toast.success('Message was removed!', toast_settings);
                 state.map_string = stringify(Array.from(check.map.entries()));
+                state.comserver_script_map_string = stringify(Array.from(mapper.map_comserver_to_scripts(check.map).entries()));
+                state.script_comserver_map_string = stringify(Array.from(mapper.map_scripts_to_comserver(check.map).entries())); 
             }else{
                 toast.dismiss()
                 toast.error(check.message, toast_settings)
@@ -124,15 +128,23 @@ const slice = createSlice({
                 toast.error(check.message, toast_settings)
             }
         },
+        
         search_map: (state, action) => {
             let map_to_use = new Map(parse(state.map_string))
             let check = mapper.search(map_to_use, action.payload.search_query, action.payload.parent_directory);
             if(check.status){
                 state.map_string = stringify(Array.from(check.map.entries()))
-                state.comserver_script_map_string = stringify(Array.from(mapper.map_comserver_to_scripts(check.map).entries()));
-                state.script_comserver_map_string = stringify(Array.from(mapper.map_scripts_to_comserver(check.map).entries())); 
             }
         },
+        
+        search_filtered: (state, action) => {
+            let map_to_use = new Map(parse(state.map_string))
+            let check = mapper.search_filtered(map_to_use, action.payload.search_query,action.payload.comservers, action.payload.scripts, action.payload.parent_directory);
+            if(check.status){
+                state.map_string = stringify(Array.from(check.map.entries())) 
+            }
+        },
+        
         load_ids: (state, action) => {
             let map_to_use = new Map(parse(state.map_string))
             let check = mapper.add_uids_to_everything(map_to_use);
@@ -150,6 +162,6 @@ const slice = createSlice({
     }
 });
 
-export const { load_ids, add_directory, add_message, remove_directory, remove_message, modify_directory, modify_message, search_map } = slice.actions;
+export const { load_ids, add_directory, add_message, remove_directory, remove_message, modify_directory, modify_message, search_map, search_filtered } = slice.actions;
 
 export default slice.reducer;
