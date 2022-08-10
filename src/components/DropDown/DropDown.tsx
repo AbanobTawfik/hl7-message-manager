@@ -1,14 +1,12 @@
-import React, { FC, useState } from "react";
+import React, { useState } from "react";
+// @ts-ignore
 import styles from "./DropDown.module.scss";
 import { FaCog, FaSearch, FaCheckDouble, FaCheck } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { Col, Container, Form, Modal, Row } from "react-bootstrap";
 import Multiselect from "multiselect-react-dropdown";
-import { search_filtered, search_map } from "../../state/slices/map_slice";
-import {
-  change_current_directory,
-  change_current_directory_no_save,
-} from "../../state/slices/current_directory_slice";
+import { search_filtered } from "../../state/slices/map_slice";
+import { change_current_directory_no_save } from "../../state/slices/current_directory_slice";
 
 function reviver(key, value) {
   if (typeof value === "object" && value !== null) {
@@ -27,21 +25,26 @@ export function DropDown() {
   const project_map_string = global_state.map.project_map_string;
   const project_map = new Map(JSON.parse(project_map_string, reviver));
   let all_projects = [];
+  // @ts-ignore
   all_projects.push({ name: "" });
   for (let [key, value] of project_map) {
     if (key === "") {
       continue;
     }
+    // @ts-ignore
     all_projects.push({ name: key.replace(prefix, "") });
   }
   console.log(all_projects);
+  // @ts-ignore
   const script_map = project_map.get("").scripts_comserver_map;
+  // @ts-ignore
   const comserver_map = project_map.get("").comserver_scripts_map;
   // need to get all scripts and all comservers, can be easily gathered from above maps^^, get all entries ez pz
+  console.log("p", project_map, "s", script_map);
   const all_scripts = [...script_map.keys()].map((value) => {
     return { name: value };
   });
-  const all_comservers = [...comserver_map.keys()].map((value) => {
+  const all_comservers = Array.from(comserver_map.keys()).map((value) => {
     return { name: value };
   });
   all_scripts.splice(0, 0, { name: "" });
@@ -85,11 +88,13 @@ export function DropDown() {
     set_project(using_prefix);
     const new_maps = project_map.get(using_prefix);
     console.log(new_maps);
+    // @ts-ignore
     const all_scripts = [...new_maps.scripts_comserver_map.keys()].map(
       (value) => {
         return { name: value };
       }
     );
+    // @ts-ignore
     const all_comservers = [...new_maps.comserver_scripts_map.keys()].map(
       (value) => {
         return { name: value };
@@ -98,7 +103,9 @@ export function DropDown() {
     all_scripts.splice(0, 0, { name: "" });
     all_scripts.splice(all_scripts.length - 1, 1);
     all_comservers.splice(0, 0, { name: "" });
+    // @ts-ignore
     comserver_ref.current.resetSelectedValues();
+    // @ts-ignore
     script_ref.current.resetSelectedValues();
     set_comserver_selection(all_comservers);
     set_script_selection(all_scripts);
@@ -110,10 +117,13 @@ export function DropDown() {
     // inside messages we will have link to directory if user wants to access directory. This will be simpler than having
     // different "search states"
     // grab the query
+    // @ts-ignore
     const search_params = search_ref.current.value;
+    // @ts-ignore
     const comservers = comserver_ref.current
       .getSelectedItems()
       .map((elm) => elm.name);
+    // @ts-ignore
     const scripts = script_ref.current
       .getSelectedItems()
       .map((elm) => elm.name);
@@ -216,6 +226,7 @@ export function DropDown() {
           <Modal.Body>
             <Form.Label style={{ fontWeight: 800 }}>Query</Form.Label>
             <Form.Control
+              // @ts-ignore
               ref={search_ref}
               type="text"
               placeholder="Search"
@@ -238,6 +249,7 @@ export function DropDown() {
                       onSelect={(value) => {
                         filter_all_maps(value[0].name);
                       }}
+                      // @ts-ignore
                       ref={comserver_ref}
                       singleSelect={true}
                       options={all_projects} // Options to display in the dropdown
@@ -251,6 +263,7 @@ export function DropDown() {
                       Select Comservers
                     </Form.Label>
                     <Multiselect
+                      // @ts-ignore
                       ref={comserver_ref}
                       options={all_comservers} // Options to display in the dropdown
                       displayValue="name"
@@ -263,6 +276,7 @@ export function DropDown() {
                       Select Scripts
                     </Form.Label>
                     <Multiselect
+                      // @ts-ignore
                       ref={script_ref}
                       options={all_scripts} // Options to display in the dropdown
                       displayValue="name"
@@ -280,6 +294,7 @@ export function DropDown() {
                       onSelect={(value) => {
                         filter_all_maps(value[0].name);
                       }}
+                      // @ts-ignore
                       ref={comserver_ref}
                       singleSelect={true}
                       options={all_projects} // Options to display in the dropdown
@@ -293,6 +308,7 @@ export function DropDown() {
                       Select Comservers
                     </Form.Label>
                     <Multiselect
+                      // @ts-ignore
                       ref={comserver_ref}
                       singleSelect={true}
                       options={comserver_selection} // Options to display in the dropdown
@@ -309,6 +325,7 @@ export function DropDown() {
                       Select Scripts
                     </Form.Label>
                     <Multiselect
+                      // @ts-ignore
                       ref={script_ref}
                       singleSelect={true}
                       onSelect={(value) => {

@@ -22,6 +22,17 @@ let project_map = window.localStorage.getItem(global_variables.project_map)
 if(project_map === undefined){
     project_map = ""
 }
+function replacer(key, value) {
+  if (value instanceof Map) {
+    return {
+      dataType: "Map",
+      value: Array.from(value.entries()), // or with spread: value: [...value]
+    };
+  } else {
+    return value;
+  }
+}
+
 
 const slice = createSlice({
     name: "map",
@@ -37,8 +48,7 @@ const slice = createSlice({
                 toast.dismiss()
                 toast.success('Directory was added!', toast_settings);
                 state.map_string = stringify(Array.from(check.map.entries()));
-                state.comserver_script_map_string = stringify(Array.from(mapper.map_comserver_to_scripts(check.map).entries()));
-                state.script_comserver_map_string = stringify(Array.from(mapper.map_scripts_to_comserver(check.map).entries())); 
+                state.project_map_string = JSON.stringify(Array.from(mapper.map_project_to_script_comserver(check.map).entries()), replacer);
             }else{
                 toast.dismiss()
                 toast.error(check.message, toast_settings)
@@ -53,8 +63,7 @@ const slice = createSlice({
                 state.map_string = stringify(Array.from(check.map.entries()));
                 toast.dismiss()
                 toast.success('Message was added!', toast_settings);
-                state.comserver_script_map_string = stringify(Array.from(mapper.map_comserver_to_scripts(check.map).entries()));
-                state.script_comserver_map_string = stringify(Array.from(mapper.map_scripts_to_comserver(check.map).entries())); 
+                state.project_map_string = JSON.stringify(Array.from(mapper.map_project_to_script_comserver(check.map).entries()), replacer);
             }else{
                 toast.dismiss()
                 toast.error(check.message, toast_settings)
@@ -68,8 +77,7 @@ const slice = createSlice({
                 toast.dismiss()
                 toast.success('Directory was removed!', toast_settings);
                 state.map_string = stringify(Array.from(check.map.entries()));
-                state.comserver_script_map_string = stringify(Array.from(mapper.map_comserver_to_scripts(check.map).entries()));
-                state.script_comserver_map_string = stringify(Array.from(mapper.map_scripts_to_comserver(check.map).entries())); 
+                state.project_map_string = JSON.stringify(Array.from(mapper.map_project_to_script_comserver(check.map).entries()), replacer);
             }else{
                 toast.dismiss()
                 toast.error(check.message, toast_settings)
@@ -83,8 +91,7 @@ const slice = createSlice({
                 toast.dismiss()
                 toast.success('Message was removed!', toast_settings);
                 state.map_string = stringify(Array.from(check.map.entries()));
-                state.comserver_script_map_string = stringify(Array.from(mapper.map_comserver_to_scripts(check.map).entries()));
-                state.script_comserver_map_string = stringify(Array.from(mapper.map_scripts_to_comserver(check.map).entries())); 
+                state.project_map_string = JSON.stringify(Array.from(mapper.map_project_to_script_comserver(check.map).entries()), replacer);
             }else{
                 toast.dismiss()
                 toast.error(check.message, toast_settings)
@@ -101,8 +108,7 @@ const slice = createSlice({
                 toast.dismiss()
                 toast.success('Directory changes saved!', toast_settings);
                 state.map_string = stringify(Array.from(check.map.entries()));
-                state.comserver_script_map_string = stringify(Array.from(mapper.map_comserver_to_scripts(check.map).entries()));
-                state.script_comserver_map_string = stringify(Array.from(mapper.map_scripts_to_comserver(check.map).entries())); 
+                state.project_map_string = JSON.stringify(Array.from(mapper.map_project_to_script_comserver(check.map).entries()), replacer);
             }else{
                 toast.dismiss()
                 toast.error(check.message, toast_settings)
@@ -117,7 +123,7 @@ const slice = createSlice({
                 toast.dismiss()
                 toast.success('Message changes saved!', toast_settings);
                 state.map_string = stringify(Array.from(check.map.entries()));
-                state.project_map_string = stringify(Array.from(mapper.map_project_to_script_comserver(check.map).entries()));
+                state.project_map_string = JSON.stringify(Array.from(mapper.map_project_to_script_comserver(check.map).entries()), replacer);
             }else{
                 toast.dismiss()
                 toast.error(check.message, toast_settings)

@@ -36,9 +36,10 @@ export function Add() {
   const current_directory_path = global_state.current_directory;
 
   const check_message_changes = () => {
-    // @ts-ignore
     return (
+      // @ts-ignore
       (adding_file && add_description.current.value !== "") ||
+      // @ts-ignore
       (!adding_file && add_directory_name !== "")
     );
   };
@@ -67,14 +68,20 @@ export function Add() {
           scripts: array_scripts,
           // @ts-ignore
           description: add_description.current.value,
+          // @ts-ignore
           notes: add_notes.current.value,
         };
         dispatch(add_message(add_message_payload));
         // clear inputs
+        // @ts-ignore
         add_data.current.value = "";
+        // @ts-ignore
         add_description.current.value = "";
+        // @ts-ignore
         add_interface.current.value = "";
+        // @ts-ignore
         add_scripts.current.value = "";
+        // @ts-ignore
         add_notes.current.value = "";
         form_data.description = "";
         form_data.scripts = "";
@@ -90,6 +97,7 @@ export function Add() {
         };
         dispatch(add_directory(add_directory_payload));
         // clear inputs
+        // @ts-ignore
         add_directory_name.current.value = "";
         form_data.directory_name = "";
         toggle_save(false);
@@ -113,6 +121,7 @@ export function Add() {
     if (e.key === "Escape") {
       e.preventDefault();
       ref.current.blur();
+      // @ts-ignore
       modal_ref.current.focus();
     }
   };
@@ -123,6 +132,7 @@ export function Add() {
     if (e.key === "Escape") {
       e.preventDefault();
       ref.current.blur();
+      // @ts-ignore
       modal_ref.current.focus();
     }
   };
@@ -145,12 +155,14 @@ export function Add() {
           if (e.key === "d") {
             if (adding_file) {
               toggle_adding_file(false);
+              // @ts-ignore
               modal_ref.current.focus();
             }
           }
           if (e.key === "f") {
             if (!adding_file) {
               toggle_adding_file(true);
+              // @ts-ignore
               modal_ref.current.focus();
             }
           }
@@ -176,7 +188,11 @@ export function Add() {
           tabIndex={-1}
           size="lg"
         >
-          <Form tabIndex={1} ref={modal_ref}>
+          <Form
+            tabIndex={1}
+            // @ts-ignore
+            ref={modal_ref}
+          >
             <Modal.Header closeButton className="show-grid">
               <Container className={styles.Add}>
                 <Row>
@@ -255,8 +271,10 @@ export function Add() {
                       onFocus={() => toggle_focus(true)}
                       onBlur={() => toggle_focus(false)}
                       onChange={() => {
+                        // @ts-ignore
                         form_data.description = add_description.current.value;
                         toggle_save(
+                          // @ts-ignore
                           adding_file && add_description.current.value != ""
                         );
                       }}
@@ -283,9 +301,13 @@ export function Add() {
                       onFocus={() => toggle_focus(true)}
                       onBlur={() => toggle_focus(false)}
                       onChange={() => {
+                        // @ts-ignore
                         form_data.notes = add_notes.current.value;
+                        // @ts-ignore
                         add_notes.current.style.height = "0px";
+                        // @ts-ignore
                         add_notes.current.style.height =
+                          // @ts-ignore
                           add_notes.current.scrollHeight + "px";
                       }}
                       onKeyDown={(e) => {
@@ -312,9 +334,13 @@ export function Add() {
                       onBlur={() => toggle_focus(false)}
                       autoComplete="off"
                       onChange={() => {
+                        // @ts-ignore
                         form_data.raw_data = add_data.current.value;
+                        // @ts-ignore
                         add_data.current.style.height = "0px";
+                        // @ts-ignore
                         add_data.current.style.height =
+                          // @ts-ignore
                           add_data.current.scrollHeight + "px";
                       }}
                       onKeyDown={(e) => {
@@ -337,6 +363,7 @@ export function Add() {
                       onFocus={() => toggle_focus(true)}
                       onBlur={() => toggle_focus(false)}
                       onChange={() => {
+                        // @ts-ignore
                         form_data.interface = add_interface.current.value;
                       }}
                       onKeyDown={(e) => {
@@ -362,9 +389,13 @@ export function Add() {
                       onFocus={() => toggle_focus(true)}
                       onBlur={() => toggle_focus(false)}
                       onChange={() => {
+                        // @ts-ignore
                         form_data.scripts = add_scripts.current.value;
+                        // @ts-ignore
                         add_scripts.current.style.height = "0px";
+                        // @ts-ignore
                         add_scripts.current.style.height =
+                          // @ts-ignore
                           add_scripts.current.scrollHeight + "px";
                       }}
                       onKeyDown={(e) => {
@@ -394,8 +425,10 @@ export function Add() {
                       autoComplete="off"
                       onChange={() => {
                         form_data.directory_name =
+                          // @ts-ignore
                           add_directory_name.current.value;
                         toggle_save(
+                          // @ts-ignore
                           !adding_file && add_directory_name.current.value != ""
                         );
                       }}

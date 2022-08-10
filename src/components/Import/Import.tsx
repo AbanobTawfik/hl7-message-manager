@@ -1,4 +1,5 @@
 import React, { FC, useMemo, useState } from "react";
+// @ts-ignore
 import styles from "./Import.module.scss";
 import { FaUpload } from "react-icons/fa";
 import { Col, Container, Form, Modal, Row } from "react-bootstrap";
@@ -14,11 +15,6 @@ function Import() {
   const global_state = useSelector((state) => state);
   const dispatch = useDispatch();
   const [is_open, toggle_modal] = useState(false);
-  const [file, setFile] = useState(null);
-
-  const handleChange = (file) => {
-    setFile(file);
-  };
 
   const baseStyle = {
     flex: 1,
@@ -62,6 +58,7 @@ function Import() {
     },
   });
   const files = acceptedFiles.map((file) => (
+    // @ts-ignore
     <li key={file.path}>{file.path}</li>
   ));
   console.log(files);
@@ -127,7 +124,12 @@ function Import() {
             </Modal.Header>
             <Modal.Body>
               <Form.Label style={{ fontWeight: 800 }}>Upload File</Form.Label>
-              <div {...getRootProps({ style })}>
+              <div
+                {...getRootProps({
+                  // @ts-ignore
+                  style,
+                })}
+              >
                 <input {...getInputProps()} />
                 <p>Upload your message manager import here</p>
                 <em>(Drag 'n' drop or click to upload!)</em>

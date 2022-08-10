@@ -1,5 +1,5 @@
-import directory, { get_path_from_root } from '../types/directory.ts'
-import message from '../types/message.ts'
+import directory, { get_path_from_root } from '../types/directory'
+import message from '../types/message'
 
 function hash_message(value: message): number {
   let h: number = 5381

@@ -2,7 +2,7 @@
 import global_variables from "../globals/global_variables.ts";
 import directory from "../types/directory";
 import { stringify, parse } from "circular-json";
-import * as mapper from "../services/dictionary.ts";
+import * as mapper from "../services/dictionary";
 let database_object: Map<number, directory>;
 
 // only used on start up

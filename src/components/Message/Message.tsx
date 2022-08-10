@@ -73,14 +73,18 @@ export function Message({ message }) {
   const modal_ref = React.createRef();
 
   const check_message_changes = () => {
-    // @ts-ignore
     return (
+      // @ts-ignore
       (modify_interface.current.value !== message.comserver ||
+        // @ts-ignore
         modify_description.current.value !== message.description ||
         // @ts-ignore
         modify_scripts.current.value !== all_scripts_string ||
+        // @ts-ignore
         modify_data.current.value !== message.raw_message ||
+        // @ts-ignore
         modify_notes.current.value !== message.notes) &&
+      // @ts-ignore
       modify_description.current.value !== ""
     );
   };
@@ -148,6 +152,7 @@ export function Message({ message }) {
     if (e.key === "Escape") {
       e.preventDefault();
       ref.current.blur();
+      // @ts-ignore
       modal_ref.current.focus();
     }
   };
@@ -156,6 +161,7 @@ export function Message({ message }) {
     if (e.key === "Escape") {
       e.preventDefault();
       ref.current.blur();
+      // @ts-ignore
       modal_ref.current.focus();
     }
   };
@@ -186,16 +192,19 @@ export function Message({ message }) {
           if (e.key === "e") {
             toggle_notes(false);
             toggle_edit(true);
+            // @ts-ignore
             modal_ref.current.focus();
           }
           if (e.key === "v") {
             toggle_edit(false);
             toggle_notes(false);
+            // @ts-ignore
             modal_ref.current.focus();
           }
           if (e.key === "n") {
             toggle_edit(false);
             toggle_notes(true);
+            // @ts-ignore
             modal_ref.current.focus();
           }
         }
@@ -230,6 +239,7 @@ export function Message({ message }) {
             closeButton
             className="show-grid"
             tabIndex={1}
+            // @ts-ignore
             ref={modal_ref}
           >
             <Container className={styles.Message}>
@@ -358,6 +368,7 @@ export function Message({ message }) {
                       justifyContent: "center",
                       cursor: "pointer",
                       fontSize: "2.5rem",
+                      // @ts-ignore
                       cursor: is_saveable ? "pointer" : "not-allowed",
                     }}
                     onClick={modify_message_dispatch}
@@ -430,8 +441,11 @@ export function Message({ message }) {
                       }}
                       onChange={() => {
                         toggle_save(check_message_changes());
+                        // @ts-ignore
                         modify_notes.current.style.height = "0px";
+                        // @ts-ignore
                         modify_notes.current.style.height =
+                          // @ts-ignore
                           modify_notes.current.scrollHeight + "px";
                       }}
                       onKeyDown={(e) => {
@@ -459,8 +473,11 @@ export function Message({ message }) {
                       onBlur={() => toggle_focus(false)}
                       onChange={() => {
                         toggle_save(check_message_changes());
+                        // @ts-ignore
                         modify_data.current.style.height = "0px";
+                        // @ts-ignore
                         modify_data.current.style.height =
+                          // @ts-ignore
                           modify_data.current.scrollHeight + "px";
                       }}
                       onKeyDown={(e) => {
@@ -507,8 +524,11 @@ export function Message({ message }) {
                       }}
                       onChange={() => {
                         toggle_save(check_message_changes());
+                        // @ts-ignore
                         modify_scripts.current.style.height = "0px";
+                        // @ts-ignore
                         modify_scripts.current.style.height =
+                          // @ts-ignore
                           modify_scripts.current.scrollHeight + "px";
                       }}
                       onKeyDown={(e) => {

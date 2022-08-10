@@ -1,6 +1,5 @@
 // @ts-ignore
 import directory, {
-  get_directory_name,
   get_path_from_root,
   get_parent_path_from_root,
 } from "../types/directory";
@@ -16,12 +15,11 @@ import {
   write_keys,
   write_messages,
   read_messages,
-} from "../services/database.ts";
+} from "../services/database";
 import { stringify, parse } from "circular-json";
 import { uid } from "uid";
 import Fuse from "fuse.js";
 import global_variables from "../globals/global_variables";
-import { DRAFTABLE } from "immer/dist/internal";
 
 // passive
 export function get_directory_by_name(
@@ -29,6 +27,7 @@ export function get_directory_by_name(
   path: string
 ): directory {
   let h: number = hasher.hash(path);
+  // @ts-ignore
   return dictionary.get(h);
 }
 
@@ -160,6 +159,7 @@ export function add_message(
   }
 
   // add the message to the directory
+  // @ts-ignore
   dictionary.get(hash_value_directory).messages.push(message_to_add);
   write_file(dictionary);
   let messages_search = get_all_messages_global_searchable(dictionary);
@@ -197,7 +197,9 @@ export function remove_directory(
   let visited = new Map<string, boolean>();
   while (search_queue.length > 0) {
     let curr_node = search_queue.pop();
+    // @ts-ignore
     let curr_node_dir = get_directory_by_name(dictionary, curr_node);
+    // @ts-ignore
     visited.set(curr_node, true);
     for (let i = 0; i < curr_node_dir.sub_directories.length; i++) {
       if (visited.has(curr_node_dir.sub_directories[i])) {
@@ -210,7 +212,8 @@ export function remove_directory(
   // remove from parents sub directories list
   for (let [key, value] of visited) {
     let hash_key = hasher.hash(key);
-    dictionary.get(hash_key).messages = null;
+    // @ts-ignore
+    dictionary.get(hash_key).messages = [];
     dictionary.delete(hash_key);
   }
   let directory_index: number = parent.sub_directories.indexOf(
@@ -315,7 +318,7 @@ export function modify_directory(
     };
   }
   // since we are modifying (all dirs have only 1 parent we want to update the parents sub_directory list)
-  let new_subs: directory[] = [];
+  let new_subs: string[] = [];
   for (let i = 0; i < parent.sub_directories.length; i++) {
     if (
       !dictionary.has(hasher.hash(parent.sub_directories[i])) ||
@@ -323,9 +326,10 @@ export function modify_directory(
     ) {
       continue;
     }
+    // @ts-ignore
     new_subs.push(parent.sub_directories[i]);
   }
-
+  // @ts-ignore
   new_subs.push(get_path_from_root(directory));
 
   parent.sub_directories = new_subs;
@@ -336,6 +340,7 @@ export function modify_directory(
   let visited = new Map<string, boolean>();
   while (search_queue.length > 0) {
     let curr_node = search_queue.pop();
+    // @ts-ignore
     let curr_node_dir = get_directory_by_name(dictionary, curr_node);
     let curr_node_dir_hash = hasher.hash(curr_node_dir);
     curr_node_dir.parent_directory = curr_node_dir.parent_directory.replace(
@@ -348,6 +353,7 @@ export function modify_directory(
         i
       ].directory_path.replace(old_path, new_path);
     }
+    // @ts-ignore
     visited.set(curr_node, true);
     for (let i = 0; i < curr_node_dir.sub_directories.length; i++) {
       if (visited.has(curr_node_dir.sub_directories[i])) {
@@ -479,6 +485,7 @@ export function search(
   };
 
   let hash_value: number = hasher.hash(search_dir);
+  // @ts-ignore
   let all_messages = JSON.parse(read_messages());
   let item_results = search_messages(all_messages, search_query);
   console.log(item_results);
@@ -517,6 +524,7 @@ export function search_filtered(
   };
 
   let hash_value: number = hasher.hash(search_dir);
+  // @ts-ignore
   let all_messages = JSON.parse(read_messages());
   // filter all messages
   let filtered_messages_map: Map<string, any> = new Map<string, any>();
@@ -552,6 +560,7 @@ export function search_filtered(
   }
   let filtered_messages = [];
   for (let [key, value] of filtered_messages_map) {
+    // @ts-ignore
     filtered_messages.push(value);
   }
   console.log(filtered_messages);
@@ -592,6 +601,7 @@ export function get_all_directories_from_current(
     return [];
   }
   let all_dirs_from_current: directory[] = [];
+  // @ts-ignore
   let subs = dictionary.get(hash_value_directory).sub_directories;
   for (let i = 0; i < subs.length; i++) {
     all_dirs_from_current.push(get_directory_by_name(dictionary, subs[i]));
@@ -676,22 +686,26 @@ export function map_comserver_to_scripts(
         for (let j = 0; j < value.messages[i].scripts.length; j++) {
           if (
             value.messages[i].scripts[j].trim() === "" ||
+            // @ts-ignore
             new_vals.indexOf(value.messages[i].scripts[j].trim()) !== -1
           ) {
             continue;
           }
           new_vals?.push(value.messages[i].scripts[j].trim());
         }
+        // @ts-ignore
         ret.set(value.messages[i].comserver.trim(), new_vals);
       } else {
         let new_vals = [];
         for (let j = 0; j < value.messages[i].scripts.length; j++) {
           if (
             value.messages[i].scripts[j].trim() === "" ||
+            // @ts-ignore
             new_vals.indexOf(value.messages[i].scripts[j].trim()) !== -1
           ) {
             continue;
           }
+          // @ts-ignore
           new_vals?.push(value.messages[i].scripts[j].trim());
         }
         ret.set(value.messages[i].comserver.trim(), new_vals);
