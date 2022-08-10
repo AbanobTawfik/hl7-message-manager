@@ -19,9 +19,10 @@ import { useDispatch } from "react-redux";
 import {
   modify_message,
   remove_message,
+  move_message,
 } from "../../state/slices/map_slice.js";
 import { change_current_directory } from "../../state/slices/current_directory_slice";
-import { Menu, Item, useContextMenu } from "react-contexify";
+import { Menu, Item, useContextMenu, Submenu } from "react-contexify";
 import "react-contexify/dist/ReactContexify.css";
 
 function useHookWithRefCallBack(ref) {
@@ -36,11 +37,11 @@ function useHookWithRefCallBack(ref) {
   return set_scripts_ref;
 }
 
-export function Message({ message }) {
+export function Message({ message, move_directories }) {
   const { show } = useContextMenu({
     id: message.id,
   });
-
+  console.log(move_directories);
   const [is_open, toggle_modal] = useState(false);
   const [is_saveable, toggle_save] = useState(false);
   const [is_editing, toggle_edit] = useState(false);
@@ -87,6 +88,26 @@ export function Message({ message }) {
       // @ts-ignore
       modify_description.current.value !== ""
     );
+  };
+
+  const move_message_action = (destination) => {
+    let target = "";
+    if (destination.elm !== "..") {
+      target = message.directory_path + "/" + destination.elm;
+    } else {
+      let split = message.directory_path.split("/").slice(0, -1);
+      if (split.length === 1) {
+        target = split[0];
+      } else {
+        target = split.join("/");
+      }
+    }
+    let payload = {
+      message: message,
+      target: target,
+    };
+    console.log(target);
+    dispatch(move_message(payload));
   };
 
   const modify_message_dispatch = () => {
@@ -617,6 +638,20 @@ export function Message({ message }) {
           <Item onClick={view_change}>View</Item>
           <Item onClick={edit_change}>Edit</Item>
           <Item onClick={remove_message_dispatch}>Remove</Item>
+          <Submenu label="Move">
+            {move_directories.map((elm, i) => {
+              return (
+                <Item
+                  key={i}
+                  onClick={() => {
+                    move_message_action({ elm });
+                  }}
+                >
+                  {elm}
+                </Item>
+              );
+            })}
+          </Submenu>
         </Menu>
       )}
     </div>

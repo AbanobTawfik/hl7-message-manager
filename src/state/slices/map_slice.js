@@ -148,6 +148,19 @@ const slice = createSlice({
         import_dictionary: (state, action) => {
             state.map_string = window.localStorage.getItem('dictionary')
         },
+        move_message(state, action){
+            let map_to_use = new Map(parse(state.map_string))
+            let check = mapper.move_message(map_to_use, action.payload.message, action.payload.target);
+            if(check.status){
+                toast.dismiss()
+                toast.success('Message was moved to ' + action.payload.target +'!', toast_settings);
+                state.map_string = stringify(Array.from(check.map.entries()));
+                state.project_map_string = JSON.stringify(Array.from(mapper.map_project_to_script_comserver(check.map).entries()), replacer);
+            }else{
+                toast.dismiss()
+                toast.error(check.message, toast_settings)
+            }
+        },
         
         load_ids: (state, action) => {
             let map_to_use = new Map(parse(state.map_string))
@@ -166,6 +179,6 @@ const slice = createSlice({
     }
 });
 
-export const { load_ids, add_directory, add_message, remove_directory, remove_message, modify_directory, modify_message, search_map, search_filtered, import_dictionary } = slice.actions;
+export const { load_ids, add_directory, add_message, remove_directory, remove_message, modify_directory, modify_message, search_map, search_filtered, import_dictionary, move_message } = slice.actions;
 
 export default slice.reducer;

@@ -236,8 +236,9 @@ export function remove_message(
   dictionary: Map<number, directory>,
   message: message
 ): return_status {
-  let directory: directory = parse(
-    stringify(get_directory_by_name(dictionary, message.directory_path))
+  let directory: directory = get_directory_by_name(
+    dictionary,
+    message.directory_path
   );
   let hash_value_directory: number = hasher.hash(directory);
   if (!dictionary.has(hash_value_directory)) {
@@ -250,6 +251,7 @@ export function remove_message(
 
   let new_messages = [];
   let found = false;
+  console.log(message, " - ", directory.messages);
   for (let i = 0; i < directory.messages.length; i++) {
     if (
       directory.messages[i].comserver === message.comserver &&
@@ -780,6 +782,59 @@ export function fix_directories(
     dictionary.set(key, new_val);
   }
   return dictionary;
+}
+
+export function move_message(
+  dictionary: Map<number, directory>,
+  message: message,
+  target: string
+): return_status {
+  // step 1 find it
+  let current_directory: directory = get_directory_by_name(
+    dictionary,
+    message.directory_path
+  );
+  let hash_value_current_directory: number = hasher.hash(current_directory);
+  if (!dictionary.has(hash_value_current_directory)) {
+    return {
+      map: dictionary,
+      status: false,
+      message: "Source directory doesn't exist!",
+    };
+  }
+  let target_directory: directory = get_directory_by_name(dictionary, target);
+  let hash_value_target_directory: number = hasher.hash(target_directory);
+  if (!dictionary.has(hash_value_target_directory)) {
+    return {
+      map: dictionary,
+      status: false,
+      message: "Target directory doesn't exist!",
+    };
+  }
+  // step 2 add it to target directory
+  let search = target_directory.messages.filter((item) => {
+    return item.description === message.description;
+  });
+  if (search.length !== 0) {
+    message.description += " (1)";
+  }
+  message.directory_path = target;
+  target_directory.messages.push(message);
+  // step 3 delete it from current directory
+  current_directory.messages = current_directory.messages.filter((item) => {
+    return item.id !== message.id && item.description !== message.description;
+  });
+  // step 4 update maps
+  dictionary.set(hash_value_target_directory, target_directory);
+  dictionary.set(hash_value_current_directory, current_directory);
+  write_file(dictionary);
+  let messages_search = get_all_messages_global_searchable(dictionary);
+  write_messages(messages_search);
+  return {
+    map: dictionary,
+    status: true,
+    message: "message was moved to + " + target + "!",
+  };
 }
 
 function search_messages(messages: any[], search_query: string): message[] {
