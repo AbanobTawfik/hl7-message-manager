@@ -811,12 +811,20 @@ export function move_message(
       message: "Target directory doesn't exist!",
     };
   }
+
   // step 2 add it to target directory
   let search = target_directory.messages.filter((item) => {
     return item.description === message.description;
   });
-  if (search.length !== 0) {
-    message.description += " (1)";
+  let old_message_description = message.description;
+  let count = 1;
+  while (search.length !== 0) {
+    message.description =
+      old_message_description + " (" + count.toString() + ")";
+    count++;
+    search = target_directory.messages.filter((item) => {
+      return item.description === message.description;
+    });
   }
   message.directory_path = target;
   target_directory.messages.push(message);
@@ -833,22 +841,23 @@ export function move_message(
   return {
     map: dictionary,
     status: true,
-    message: "message was moved to + " + target + "!",
+    message: "message was moved to " + target + "!",
   };
 }
 
+// step 0 check target directory, retrieve see if it exists
+// step 1 compute hash of current directory, check if it exists
+// step 2 check subdirectories of target if they have a directory with name ending path same, append (1) to it if it does
+// step 3 add to subdirectory of target
+// step 4 remove as subdirectory of current parent
+// step 5 downstream renaming to match new destination
+// step 6 fix map to remove previous hash of old directory and replace with new hash of current directory
+// modifying
 export function move_directory(
   dictionary: Map<number, directory>,
   directory: directory,
   target: string
 ): return_status {
-  // step 0 check target directory, retrieve see if it exists
-  // step 1 compute hash of current directory, check if it exists
-  // step 2 check subdirectories of target if they have a directory with name ending path same, append (1) to it if it does
-  // step 3 add to subdirectory of target
-  // step 4 remove as subdirectory of current parent
-  // step 5 downstream renaming to match new destination
-  // step 6 fix map to remove previous hash of old directory and replace with new hash of current directory
   let target_directory: directory = get_directory_by_name(dictionary, target);
   let hash_value_target_directory: number = hasher.hash(target_directory);
   if (!dictionary.has(hash_value_target_directory)) {
@@ -886,6 +895,18 @@ export function move_directory(
     let split = item.split("/");
     return split[split.length - 1] === directory.name;
   });
+  let adding_string = "";
+  let count = 1;
+  console.log("length", search.length);
+  while (search.length !== 0) {
+    console.log(adding_string);
+    adding_string = " (" + count + ")";
+    count++;
+    search = target_directory.sub_directories.filter((item) => {
+      let split = item.split("/");
+      return split[split.length - 1] === directory.name + adding_string;
+    });
+  }
   let old_path = directory.parent_directory + "/" + directory.name;
   // step 4
   current_directory.sub_directories = current_directory.sub_directories.filter(
@@ -895,9 +916,7 @@ export function move_directory(
     }
   );
 
-  if (search.length !== 0) {
-    directory.name += " (1)";
-  }
+  directory.name += adding_string;
 
   // step 3
   let insert =
@@ -996,6 +1015,240 @@ export function move_directory(
     map: dictionary,
     status: true,
     message: "directory was moved to + " + target + "!",
+  };
+}
+
+export function copy_message(message: message) {
+  // copy to clipboard the message
+  console.log(message);
+  localStorage.setItem(global_variables.clipboard, JSON.stringify(message));
+}
+
+export function copy_directory(directory: directory) {
+  localStorage.setItem(global_variables.clipboard, JSON.stringify(directory));
+}
+
+export function paste_general(
+  dictionary: Map<number, directory>
+): return_status {
+  let paste_object_string = window.localStorage.getItem(
+    global_variables.clipboard
+  );
+  if (
+    paste_object_string !== undefined &&
+    paste_object_string !== null &&
+    paste_object_string !== ""
+  ) {
+    let paste_object = JSON.parse(paste_object_string);
+    if (paste_object.type === "message") {
+      return paste_message(dictionary, paste_object);
+    } else {
+      return paste_directory(dictionary, paste_object);
+    }
+  } else {
+    return {
+      map: dictionary,
+      status: false,
+      message: "Nothing in clipboard!",
+    };
+  }
+}
+
+export function paste_message(
+  dictionary: Map<number, directory>,
+  message: message
+): return_status {
+  let current_directory_string = window.localStorage.getItem(
+    global_variables.current_directory
+  );
+  if (
+    current_directory_string === null ||
+    current_directory_string === undefined
+  ) {
+    current_directory_string = "";
+  }
+
+  let current_directory: directory = get_directory_by_name(
+    dictionary,
+    current_directory_string
+  );
+  let hash_value_current_directory = hasher.hash(current_directory);
+  if (!dictionary.has(hash_value_current_directory)) {
+    return {
+      map: dictionary,
+      status: false,
+      message: "Current directory not found!",
+    };
+  }
+  let copy_message = JSON.parse(JSON.stringify(message));
+
+  let search = current_directory.messages.filter((item) => {
+    return item.description === copy_message.description;
+  });
+  let old_message_description = copy_message.description;
+  let count = 1;
+  while (search.length !== 0) {
+    console.log(search.length);
+    copy_message.description =
+      old_message_description + " (" + count.toString() + ")";
+    console.log(copy_message.description);
+    count++;
+    search = current_directory.messages.filter((item) => {
+      return item.description === copy_message.description;
+    });
+  }
+
+  copy_message.directory_path = current_directory_string;
+  copy_message.id = uid(16);
+  current_directory.messages.push(copy_message);
+  // step 4 update maps
+  dictionary.set(hash_value_current_directory, current_directory);
+  write_file(dictionary);
+  let messages_search = get_all_messages_global_searchable(dictionary);
+  write_messages(messages_search);
+  return {
+    map: dictionary,
+    status: true,
+    message: "message Pasted!",
+  };
+}
+
+export function paste_directory(
+  dictionary: Map<number, directory>,
+  directory: directory
+): return_status {
+  let current_directory_string = window.localStorage.getItem(
+    global_variables.current_directory
+  );
+  if (
+    current_directory_string === null ||
+    current_directory_string === undefined
+  ) {
+    current_directory_string = "";
+  }
+
+  let current_directory: directory = get_directory_by_name(
+    dictionary,
+    current_directory_string
+  );
+  let hash_value_current_directory = hasher.hash(current_directory);
+  if (!dictionary.has(hash_value_current_directory)) {
+    return {
+      map: dictionary,
+      status: false,
+      message: "Current directory not found!",
+    };
+  }
+
+  // cancer
+  let copy_directory = JSON.parse(JSON.stringify(directory));
+  copy_directory.id = uid(16);
+  let search = current_directory.sub_directories.filter((item) => {
+    let split = item.split("/");
+    return split[split.length - 1] === copy_directory.name;
+  });
+  let adding_string = "";
+  let count = 1;
+  console.log("length", search.length);
+  while (search.length !== 0) {
+    console.log(adding_string);
+    adding_string = " (" + count + ")";
+    count++;
+    search = current_directory.sub_directories.filter((item) => {
+      let split = item.split("/");
+      return split[split.length - 1] === copy_directory.name + adding_string;
+    });
+  }
+  let old_path = copy_directory.parent_directory + "/" + copy_directory.name;
+
+  copy_directory.name += adding_string;
+  // step 3
+  let insert =
+    current_directory.parent_directory !== ""
+      ? current_directory.parent_directory +
+        "/" +
+        current_directory.name +
+        "/" +
+        copy_directory.name
+      : current_directory.name + "/" + copy_directory.name;
+  current_directory.sub_directories.push(insert);
+  let new_path =
+    current_directory.parent_directory !== ""
+      ? current_directory.parent_directory +
+        "/" +
+        current_directory.name +
+        "/" +
+        copy_directory.name
+      : current_directory.name + "/" + copy_directory.name;
+  console.log(old_path, " -> ", new_path);
+  let first = true;
+  // fix all subdirectories downstream from CURRENT directory
+  let search_queue = [old_path];
+  let visited = new Map<string, boolean>();
+  while (search_queue.length > 0) {
+    console.log(search_queue);
+    let curr_node = search_queue.pop();
+    // @ts-ignore
+    let curr_node_dir = get_directory_by_name(dictionary, curr_node);
+    console.log(
+      "PARENT_DIRECTORY:",
+      curr_node_dir.parent_directory,
+      "\nNAME:",
+      curr_node_dir.name,
+      "\nOLD_PATH:",
+      old_path,
+      "\nNEW_PATH:",
+      new_path
+    );
+
+    curr_node_dir.parent_directory = curr_node_dir.parent_directory.replace(
+      old_path.split("/").slice(0, -1).join("/"),
+      new_path.split("/").slice(0, -1).join("/")
+    );
+
+    console.log(
+      "CHANGED PARENT_DIRECTORY:",
+      curr_node_dir.parent_directory,
+      "\nCHANGED NAME:",
+      curr_node_dir.name
+    );
+    // fix the messages path
+    for (let i = 0; i < curr_node_dir.messages.length; i++) {
+      curr_node_dir.messages[i].directory_path = curr_node_dir.messages[
+        i
+      ].directory_path.replace(old_path, new_path);
+      curr_node_dir.messages[i].id = uid(16);
+    }
+    // @ts-ignore
+    visited.set(curr_node, true);
+    for (let i = 0; i < curr_node_dir.sub_directories.length; i++) {
+      if (visited.has(curr_node_dir.sub_directories[i])) {
+        continue;
+      }
+      search_queue.push(curr_node_dir.sub_directories[i]);
+    }
+    // fix subs
+    for (let i = 0; i < curr_node_dir.sub_directories.length; i++) {
+      console.log(curr_node_dir);
+      console.log(curr_node_dir.sub_directories[i]);
+      curr_node_dir.sub_directories[i] = curr_node_dir.sub_directories[
+        i
+      ].replace(old_path, new_path);
+      console.log(curr_node_dir.sub_directories[i]);
+    }
+    // recompute hash for the curr_node_dir since its changed parent
+    dictionary.set(hasher.hash(curr_node_dir), curr_node_dir);
+  }
+  // directory.parent_directory = new_parent;
+  dictionary.set(hash_value_current_directory, current_directory);
+  dictionary.set(hasher.hash(copy_directory), copy_directory);
+  write_file(dictionary);
+  let messages_search = get_all_messages_global_searchable(dictionary);
+  write_messages(messages_search);
+  return {
+    map: dictionary,
+    status: true,
+    message: "directory was copied!",
   };
 }
 

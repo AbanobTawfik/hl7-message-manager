@@ -1,5 +1,7 @@
 import React, { FC, useState, useCallback } from "react";
+// @ts-ignore
 import styles from "./Folder.module.scss";
+// @ts-ignore
 import folder_icon from "../../resources/Icons/folder.png";
 import directory from "../../types/directory";
 import { useSelector, useDispatch } from "react-redux";
@@ -18,6 +20,7 @@ import {
   remove_directory,
   modify_directory,
   move_directory,
+  copy_directory,
 } from "../../state/slices/map_slice.js";
 
 // folder component, takes in directory and shows just the name of the current directory
@@ -59,6 +62,7 @@ export function Folder({ folder, move_directories }) {
       const remove_directory_payload = {
         directory_path: folder.name,
         directory_string: dir_name,
+        // @ts-ignore
         name: modify_directory_name.current.value,
       };
       dispatch(modify_directory(remove_directory_payload));
@@ -90,6 +94,7 @@ export function Folder({ folder, move_directories }) {
     if (e.key === "Escape") {
       e.preventDefault();
       ref.current.blur();
+      // @ts-ignore
       modal_ref.current.focus();
     }
     if (e.key === "Enter") {
@@ -97,6 +102,13 @@ export function Folder({ folder, move_directories }) {
         modify_directory_dispatch();
       }
     }
+  };
+
+  const copy_directory_action = () => {
+    let payload = {
+      directory: folder,
+    };
+    dispatch(copy_directory(payload));
   };
 
   return (
@@ -136,6 +148,7 @@ export function Folder({ folder, move_directories }) {
         }}
         size="lg"
       >
+        // @ts-ignore
         <Form tabIndex={1} ref={modal_ref}>
           <Modal.Header closeButton className="show-grid">
             <Container className={styles.Add}>
@@ -178,7 +191,9 @@ export function Folder({ folder, move_directories }) {
                   onChange={() => {
                     // @ts-ignore
                     toggle_save(
+                      // @ts-ignore
                       modify_directory_name.current.value != folder.name &&
+                        // @ts-ignore
                         modify_directory_name.current.value != ""
                     );
                   }}
@@ -203,7 +218,7 @@ export function Folder({ folder, move_directories }) {
             Rename{" "}
           </Item>
 
-          <Item onClick={remove_directory_dispatch}>Remove </Item>
+          <Item onClick={copy_directory_action}>Copy</Item>
           <Submenu label="Move">
             {move_directories.map((elm, i) => {
               return (
@@ -218,6 +233,7 @@ export function Folder({ folder, move_directories }) {
               );
             })}
           </Submenu>
+          <Item onClick={remove_directory_dispatch}>Remove </Item>
         </Menu>
       )}
     </div>

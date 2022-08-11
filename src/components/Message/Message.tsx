@@ -20,6 +20,7 @@ import {
   modify_message,
   remove_message,
   move_message,
+  copy_message,
 } from "../../state/slices/map_slice.js";
 import { change_current_directory } from "../../state/slices/current_directory_slice";
 import { Menu, Item, useContextMenu, Submenu } from "react-contexify";
@@ -106,6 +107,13 @@ export function Message({ message, move_directories }) {
       target: target,
     };
     dispatch(move_message(payload));
+  };
+
+  const copy_message_action = () => {
+    let payload = {
+      message: message,
+    };
+    dispatch(copy_message(payload));
   };
 
   const modify_message_dispatch = () => {
@@ -634,7 +642,7 @@ export function Message({ message, move_directories }) {
         <Menu id={message.id}>
           <Item onClick={view_change}>View</Item>
           <Item onClick={edit_change}>Edit</Item>
-          <Item onClick={remove_message_dispatch}>Remove</Item>
+          <Item onClick={copy_message_action}>Copy</Item>
           <Submenu label="Move">
             {move_directories.map((elm, i) => {
               return (
@@ -649,6 +657,7 @@ export function Message({ message, move_directories }) {
               );
             })}
           </Submenu>
+          <Item onClick={remove_message_dispatch}>Remove</Item>
         </Menu>
       )}
     </div>

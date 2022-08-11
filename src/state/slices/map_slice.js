@@ -19,14 +19,14 @@ const toast_settings = {
   }
 let initial_map = stringify(Array.from(dba.read_file().entries()));
 let project_map = window.localStorage.getItem(global_variables.project_map)
-if(project_map === undefined){
-    project_map = ""
+if(project_map === undefined || project_map === null){
+    project_map = "{}"
 }
 function replacer(key, value) {
   if (value instanceof Map) {
     return {
       dataType: "Map",
-      value: Array.from(value.entries()), // or with spread: value: [...value]
+      value: Array.from(value.entries()), 
     };
   } else {
     return value;
@@ -174,6 +174,29 @@ const slice = createSlice({
                 toast.error(check.message, toast_settings)
             }
         },
+        copy_message(state, action){
+            mapper.copy_message(action.payload.message);
+            toast.dismiss()
+            toast.success('Message is now copied, ready to be pasted!', toast_settings);
+        },
+        copy_directory(state, action){
+            mapper.copy_directory(action.payload.directory);
+            toast.dismiss()
+            toast.success('Directory is now copied, ready to be pasted!', toast_settings);
+        },
+        paste_general(state, action){
+            let map_to_use = new Map(parse(state.map_string))
+            let check = mapper.paste_general(map_to_use);
+            if(check.status){
+                toast.dismiss()
+                toast.success('Pasted!', toast_settings);
+                state.map_string = stringify(Array.from(check.map.entries()));
+                state.project_map_string = JSON.stringify(Array.from(mapper.map_project_to_script_comserver(check.map).entries()), replacer);
+            }else{
+                toast.dismiss()
+                toast.error(check.message, toast_settings)
+            }
+        },
         load_ids: (state, action) => {
             let map_to_use = new Map(parse(state.map_string))
             let check = mapper.add_uids_to_everything(map_to_use);
@@ -191,6 +214,9 @@ const slice = createSlice({
     }
 });
 
-export const { load_ids, add_directory, add_message, remove_directory, remove_message, modify_directory, modify_message, search_map, search_filtered, import_dictionary, move_message, move_directory } = slice.actions;
+export const { load_ids, add_directory, add_message, remove_directory, 
+               remove_message, modify_directory, modify_message, search_map, 
+               search_filtered, import_dictionary, move_message, move_directory, 
+               copy_message, copy_directory, paste_general } = slice.actions;
 
 export default slice.reducer;

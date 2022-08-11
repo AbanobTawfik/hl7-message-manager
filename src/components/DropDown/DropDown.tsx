@@ -23,7 +23,10 @@ export function DropDown() {
   const current_directory_path = global_state.current_directory;
   // @ts-ignore
   const project_map_string = global_state.map.project_map_string;
-  const project_map = new Map(JSON.parse(project_map_string, reviver));
+  const project_map =
+    project_map_string === "{}"
+      ? new Map<string, any>()
+      : new Map(JSON.parse(project_map_string, reviver));
   let all_projects = [];
   // @ts-ignore
   all_projects.push({ name: "" });
@@ -34,10 +37,16 @@ export function DropDown() {
     // @ts-ignore
     all_projects.push({ name: key.replace(prefix, "") });
   }
-  // @ts-ignore
-  const script_map = project_map.get("").scripts_comserver_map;
-  // @ts-ignore
-  const comserver_map = project_map.get("").comserver_scripts_map;
+  const script_map =
+    // @ts-ignore
+    project_map_string === "{}"
+      ? new Map<string, string[]>()
+      : project_map.get("").scripts_comserver_map;
+  const comserver_map =
+    // @ts-ignore
+    project_map_string === "{}"
+      ? new Map<string, string[]>()
+      : project_map.get("").comserver_scripts_map;
   // need to get all scripts and all comservers, can be easily gathered from above maps^^, get all entries ez pz
   const all_scripts = [...script_map.keys()].map((value) => {
     return { name: value };
