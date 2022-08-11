@@ -137,15 +137,12 @@ export function Add() {
     }
   };
 
-  console.log(is_open);
-
   return (
     <div
       className={styles.Add}
       style={{ cursor: "pointer" }}
       data-testid="Add"
       onKeyDown={(e) => {
-        console.log("HI");
         if (!has_focus && is_open) {
           if (e.key === "Enter") {
             if (is_saveable) {

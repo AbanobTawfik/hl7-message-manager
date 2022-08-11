@@ -837,6 +837,168 @@ export function move_message(
   };
 }
 
+export function move_directory(
+  dictionary: Map<number, directory>,
+  directory: directory,
+  target: string
+): return_status {
+  // step 0 check target directory, retrieve see if it exists
+  // step 1 compute hash of current directory, check if it exists
+  // step 2 check subdirectories of target if they have a directory with name ending path same, append (1) to it if it does
+  // step 3 add to subdirectory of target
+  // step 4 remove as subdirectory of current parent
+  // step 5 downstream renaming to match new destination
+  // step 6 fix map to remove previous hash of old directory and replace with new hash of current directory
+  let target_directory: directory = get_directory_by_name(dictionary, target);
+  let hash_value_target_directory: number = hasher.hash(target_directory);
+  if (!dictionary.has(hash_value_target_directory)) {
+    return {
+      map: dictionary,
+      status: false,
+      message: "Target directory doesn't exist!",
+    };
+  }
+  let hash_value_moving_directory: number = hasher.hash(directory);
+  if (!dictionary.has(hash_value_target_directory)) {
+    return {
+      map: dictionary,
+      status: false,
+      message: "Directory you are moving doesn't exist!",
+    };
+  }
+
+  let current_directory: directory = get_directory_by_name(
+    dictionary,
+    directory.parent_directory
+  );
+  let hash_value_current_directory: number = hasher.hash(
+    directory.parent_directory
+  );
+  if (!dictionary.has(hash_value_target_directory)) {
+    return {
+      map: dictionary,
+      status: false,
+      message: "Current directory doesn't exist!",
+    };
+  }
+  // step 2 check the ends of each subidrectory with the NAME of moving directory
+  let search = target_directory.sub_directories.filter((item) => {
+    let split = item.split("/");
+    return split[split.length - 1] === directory.name;
+  });
+  let old_path = directory.parent_directory + "/" + directory.name;
+  // step 4
+  current_directory.sub_directories = current_directory.sub_directories.filter(
+    (item) => {
+      let split = item.split("/");
+      return split[split.length - 1] !== directory.name;
+    }
+  );
+
+  if (search.length !== 0) {
+    directory.name += " (1)";
+  }
+
+  // step 3
+  let insert =
+    target_directory.parent_directory !== ""
+      ? target_directory.parent_directory +
+        "/" +
+        target_directory.name +
+        "/" +
+        directory.name
+      : target_directory.name + "/" + directory.name;
+  target_directory.sub_directories.push(insert);
+  let new_path =
+    target_directory.parent_directory !== ""
+      ? target_directory.parent_directory +
+        "/" +
+        target_directory.name +
+        "/" +
+        directory.name
+      : target_directory.name + "/" + directory.name;
+  console.log(old_path, " -> ", new_path);
+  let first = true;
+  // fix all subdirectories downstream from CURRENT directory
+  let search_queue = [old_path];
+  let visited = new Map<string, boolean>();
+
+  while (search_queue.length > 0) {
+    console.log(search_queue);
+    let curr_node = search_queue.pop();
+    // @ts-ignore
+    let curr_node_dir = get_directory_by_name(dictionary, curr_node);
+    let curr_node_dir_hash = hasher.hash(curr_node_dir);
+    console.log(
+      "PARENT_DIRECTORY:",
+      curr_node_dir.parent_directory,
+      "\nOLD_PATH:",
+      old_path,
+      "\nNEW_PATH:",
+      new_path
+    );
+    if (!first) {
+      curr_node_dir.parent_directory = curr_node_dir.parent_directory.replace(
+        old_path,
+        new_path
+      );
+    } else {
+      curr_node_dir.parent_directory = curr_node_dir.parent_directory.replace(
+        old_path.split("/").slice(0, -1).join("/"),
+        new_path.split("/").slice(0, -1).join("/")
+      );
+      if (curr_node_dir.id === directory.id) {
+        curr_node_dir.name = directory.name;
+      }
+      first = false;
+    }
+    console.log("NEW PARENT_DIRECTORY:", curr_node_dir.parent_directory);
+    // fix the messages path
+    for (let i = 0; i < curr_node_dir.messages.length; i++) {
+      curr_node_dir.messages[i].directory_path = curr_node_dir.messages[
+        i
+      ].directory_path.replace(old_path, new_path);
+    }
+    // @ts-ignore
+    visited.set(curr_node, true);
+    for (let i = 0; i < curr_node_dir.sub_directories.length; i++) {
+      if (visited.has(curr_node_dir.sub_directories[i])) {
+        continue;
+      }
+      search_queue.push(curr_node_dir.sub_directories[i]);
+    }
+    // fix subs
+    for (let i = 0; i < curr_node_dir.sub_directories.length; i++) {
+      console.log(
+        curr_node_dir.sub_directories[i],
+        "old path: ",
+        old_path,
+        "new_path:",
+        new_path
+      );
+      curr_node_dir.sub_directories[i] = curr_node_dir.sub_directories[
+        i
+      ].replace(old_path, new_path);
+    }
+    console.log(curr_node_dir);
+    // recompute hash for the curr_node_dir since its changed parent
+    dictionary.delete(curr_node_dir_hash);
+    dictionary.set(hasher.hash(curr_node_dir), curr_node_dir);
+  }
+  // directory.parent_directory = new_parent;
+  dictionary.delete(hash_value_moving_directory);
+  dictionary.set(hash_value_current_directory, current_directory);
+  dictionary.set(hash_value_target_directory, target_directory);
+  write_file(dictionary);
+  let messages_search = get_all_messages_global_searchable(dictionary);
+  write_messages(messages_search);
+  return {
+    map: dictionary,
+    status: true,
+    message: "directory was moved to + " + target + "!",
+  };
+}
+
 function search_messages(messages: any[], search_query: string): message[] {
   const options = {
     keys: ["combined_keys"],

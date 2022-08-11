@@ -61,7 +61,6 @@ function Import() {
     // @ts-ignore
     <li key={file.path}>{file.path}</li>
   ));
-  console.log(files);
   const style = useMemo(
     () => ({
       ...baseStyle,

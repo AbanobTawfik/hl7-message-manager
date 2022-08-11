@@ -161,7 +161,19 @@ const slice = createSlice({
                 toast.error(check.message, toast_settings)
             }
         },
-        
+        move_directory(state, action){
+            let map_to_use = new Map(parse(state.map_string))
+            let check = mapper.move_directory(map_to_use, action.payload.directory, action.payload.target);
+            if(check.status){
+                toast.dismiss()
+                toast.success('Directory was moved to ' + action.payload.target +'!', toast_settings);
+                state.map_string = stringify(Array.from(check.map.entries()));
+                state.project_map_string = JSON.stringify(Array.from(mapper.map_project_to_script_comserver(check.map).entries()), replacer);
+            }else{
+                toast.dismiss()
+                toast.error(check.message, toast_settings)
+            }
+        },
         load_ids: (state, action) => {
             let map_to_use = new Map(parse(state.map_string))
             let check = mapper.add_uids_to_everything(map_to_use);
@@ -179,6 +191,6 @@ const slice = createSlice({
     }
 });
 
-export const { load_ids, add_directory, add_message, remove_directory, remove_message, modify_directory, modify_message, search_map, search_filtered, import_dictionary, move_message } = slice.actions;
+export const { load_ids, add_directory, add_message, remove_directory, remove_message, modify_directory, modify_message, search_map, search_filtered, import_dictionary, move_message, move_directory } = slice.actions;
 
 export default slice.reducer;

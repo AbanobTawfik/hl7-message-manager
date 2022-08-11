@@ -15,8 +15,7 @@ import hasher from "../../services/hash.ts";
 import Add from "../Add/Add.tsx";
 import { ToastContainer } from "react-toastify";
 import { useSelector } from "react-redux";
-import { stringify, parse } from "circular-json";
-import { current } from "immer";
+import { parse } from "circular-json";
 
 export function Window({ current_directory }) {
   let all_subs_and_messages = [];
@@ -25,9 +24,9 @@ export function Window({ current_directory }) {
 
   // @ts-ignore
   const dictionary: Map<number, directory> = new Map(
+    // @ts-ignore
     parse(global_state.map.map_string)
   );
-  console.log(dictionary);
   let all_subs = mapper.get_all_directories_from_current(
     dictionary,
     direct.get_path_from_root(current_directory)
@@ -88,6 +87,7 @@ export function Window({ current_directory }) {
                 entry.type === "message" ? (
                   <div
                     className="col-xl-2 col-lg-4 col-md-4 col-sm-6 col-12"
+                    // @ts-ignore
                     key={entry.id}
                   >
                     <Message
@@ -100,7 +100,10 @@ export function Window({ current_directory }) {
                     className="col-xl-2 col-lg-4 col-md-4 col-sm-6 col-12"
                     key={hasher.hash(entry)}
                   >
-                    <Folder folder={entry} />
+                    <Folder
+                      folder={entry}
+                      move_directories={move_directories}
+                    />
                   </div>
                 );
               })}

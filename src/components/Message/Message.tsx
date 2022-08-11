@@ -41,7 +41,6 @@ export function Message({ message, move_directories }) {
   const { show } = useContextMenu({
     id: message.id,
   });
-  console.log(move_directories);
   const [is_open, toggle_modal] = useState(false);
   const [is_saveable, toggle_save] = useState(false);
   const [is_editing, toggle_edit] = useState(false);
@@ -106,7 +105,6 @@ export function Message({ message, move_directories }) {
       message: message,
       target: target,
     };
-    console.log(target);
     dispatch(move_message(payload));
   };
 
@@ -138,7 +136,6 @@ export function Message({ message, move_directories }) {
         // @ts-ignore
         notes: modify_notes.current.value,
       };
-      console.log(modify_message_payload);
       dispatch(modify_message(modify_message_payload));
       toggle_save(false);
       toggle_edit(false);

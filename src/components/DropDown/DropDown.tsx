@@ -34,13 +34,11 @@ export function DropDown() {
     // @ts-ignore
     all_projects.push({ name: key.replace(prefix, "") });
   }
-  console.log(all_projects);
   // @ts-ignore
   const script_map = project_map.get("").scripts_comserver_map;
   // @ts-ignore
   const comserver_map = project_map.get("").comserver_scripts_map;
   // need to get all scripts and all comservers, can be easily gathered from above maps^^, get all entries ez pz
-  console.log("p", project_map, "s", script_map);
   const all_scripts = [...script_map.keys()].map((value) => {
     return { name: value };
   });
@@ -87,7 +85,6 @@ export function DropDown() {
     let using_prefix = project === "" ? "" : prefix + project;
     set_project(using_prefix);
     const new_maps = project_map.get(using_prefix);
-    console.log(new_maps);
     // @ts-ignore
     const all_scripts = [...new_maps.scripts_comserver_map.keys()].map(
       (value) => {
