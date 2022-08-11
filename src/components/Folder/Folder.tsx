@@ -148,8 +148,11 @@ export function Folder({ folder, move_directories }) {
         }}
         size="lg"
       >
-        // @ts-ignore
-        <Form tabIndex={1} ref={modal_ref}>
+        <Form
+          tabIndex={1}
+          // @ts-ignore
+          ref={modal_ref}
+        >
           <Modal.Header closeButton className="show-grid">
             <Container className={styles.Add}>
               <Row>
