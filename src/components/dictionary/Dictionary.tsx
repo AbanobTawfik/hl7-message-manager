@@ -41,6 +41,7 @@ export function Dictionary(DictionaryProps) {
     dictionary,
     current_directory_path.path
   );
+  console.log(current_directory);
   return (
     <div
       className={styles.Dictionary}

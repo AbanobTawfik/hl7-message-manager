@@ -1171,7 +1171,7 @@ export function paste_directory(
         "/" +
         copy_directory.name
       : current_directory.name + "/" + copy_directory.name;
-  current_directory.sub_directories.push(insert);
+  // current_directory.sub_directories.push(insert);
   let new_path =
     current_directory.parent_directory !== ""
       ? current_directory.parent_directory +
@@ -1181,7 +1181,6 @@ export function paste_directory(
         copy_directory.name
       : current_directory.name + "/" + copy_directory.name;
   console.log(old_path, " -> ", new_path);
-  let first = true;
   // fix all subdirectories downstream from CURRENT directory
   let search_queue = [old_path];
   let visited = new Map<string, boolean>();
@@ -1189,37 +1188,36 @@ export function paste_directory(
     console.log(search_queue);
     let curr_node = search_queue.pop();
     // @ts-ignore
+    console.log(curr_node);
     let curr_node_dir = get_directory_by_name(dictionary, curr_node);
-    console.log(
-      "PARENT_DIRECTORY:",
-      curr_node_dir.parent_directory,
-      "\nNAME:",
-      curr_node_dir.name,
-      "\nOLD_PATH:",
-      old_path,
-      "\nNEW_PATH:",
-      new_path
-    );
-
-    curr_node_dir.parent_directory = curr_node_dir.parent_directory.replace(
-      old_path.split("/").slice(0, -1).join("/"),
-      new_path.split("/").slice(0, -1).join("/")
-    );
-
-    console.log(
-      "CHANGED PARENT_DIRECTORY:",
-      curr_node_dir.parent_directory,
-      "\nCHANGED NAME:",
+    let insert_dir_full = (
+      curr_node_dir.parent_directory +
+      "/" +
       curr_node_dir.name
-    );
-    // fix the messages path
+    ).replace(old_path, new_path);
+    let insert_parent = insert_dir_full.split("/").slice(0, -1).join("/");
+    let insert_name_split = insert_dir_full.split("/");
+    let insert_name = insert_name_split[insert_name_split.length - 1];
+
+    console.log("INSERT PARENT", insert_parent, "INSERT NAME", insert_name);
+    dictionary = add_directory(dictionary, insert_parent, insert_name).map;
+
+    // now we want to add all messages
     for (let i = 0; i < curr_node_dir.messages.length; i++) {
-      curr_node_dir.messages[i].directory_path = curr_node_dir.messages[
-        i
-      ].directory_path.replace(old_path, new_path);
-      curr_node_dir.messages[i].id = uid(16);
+      console.log(curr_node_dir.messages[i]);
+      let msg = curr_node_dir.messages[i];
+      dictionary = add_message(
+        dictionary,
+        insert_dir_full,
+        msg.comserver,
+        msg.scripts,
+        msg.description,
+        msg.raw_message,
+        msg.notes
+      ).map;
     }
-    // @ts-ignore
+
+    // dictionary = add_directory(dictionary, )
     visited.set(curr_node, true);
     for (let i = 0; i < curr_node_dir.sub_directories.length; i++) {
       if (visited.has(curr_node_dir.sub_directories[i])) {
@@ -1227,21 +1225,10 @@ export function paste_directory(
       }
       search_queue.push(curr_node_dir.sub_directories[i]);
     }
-    // fix subs
-    for (let i = 0; i < curr_node_dir.sub_directories.length; i++) {
-      console.log(curr_node_dir);
-      console.log(curr_node_dir.sub_directories[i]);
-      curr_node_dir.sub_directories[i] = curr_node_dir.sub_directories[
-        i
-      ].replace(old_path, new_path);
-      console.log(curr_node_dir.sub_directories[i]);
-    }
-    // recompute hash for the curr_node_dir since its changed parent
-    dictionary.set(hasher.hash(curr_node_dir), curr_node_dir);
+    console.log(search_queue);
   }
   // directory.parent_directory = new_parent;
-  dictionary.set(hash_value_current_directory, current_directory);
-  dictionary.set(hasher.hash(copy_directory), copy_directory);
+  // dictionary.set(hash_value_current_directory, current_directory);
   write_file(dictionary);
   let messages_search = get_all_messages_global_searchable(dictionary);
   write_messages(messages_search);

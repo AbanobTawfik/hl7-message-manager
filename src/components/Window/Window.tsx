@@ -27,10 +27,12 @@ export function Window({ current_directory }) {
     // @ts-ignore
     parse(global_state.map.map_string)
   );
-  let all_subs = mapper.get_all_directories_from_current(
-    dictionary,
-    direct.get_path_from_root(current_directory)
-  );
+  let all_subs = mapper
+    .get_all_directories_from_current(
+      dictionary,
+      direct.get_path_from_root(current_directory)
+    )
+    .sort((a, b) => a.name.localeCompare(b.name));
   // @ts-ignore
   all_subs_and_messages.push(...all_subs);
   // @ts-ignore
@@ -40,6 +42,7 @@ export function Window({ current_directory }) {
       a.description.localeCompare(b.description)
     )
   );
+  console.log(all_subs_and_messages);
   // @ts-ignore
   all_subs_and_messages.push("final item");
   const rows = [...Array(Math.ceil((all_subs_and_messages.length + 1) / 6))];
